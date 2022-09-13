@@ -1,6 +1,7 @@
 # Design Document
 
-This document contains all the information needed for the design of Discourse.
+This document contains all the information needed for the design of Discourse.  
+**Bolded items are final decisions.**
 
 ## Frontend Frameworks
 
