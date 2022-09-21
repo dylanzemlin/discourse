@@ -7,7 +7,6 @@
  - [Dylan Zemlin](https://github.com/dylanzemlin/) (<dylan.zemlin@ou.edu>) | Back End Developer
  - [Jacob Pierce](https://github.com/pier116) (<jacob.pierce@ou.edu>) | Front End Developer
  - [Aayush Dalal](https://github.com/) (<aayush.dalal@ou.edu>) | Project Manager
-<<<<<<< HEAD
 
 ## Instructions
 
