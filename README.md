@@ -7,6 +7,7 @@
  - [Dylan Zemlin](https://github.com/dylanzemlin/) (<dylan.zemlin@ou.edu>) | Back End Developer
  - [Jacob Pierce](https://github.com/pier116) (<jacob.pierce@ou.edu>) | Front End Developer
  - [Aayush Dalal](https://github.com/) (<aayush.dalal@ou.edu>) | Project Manager
+<<<<<<< HEAD
 
 ## Instructions
 
@@ -22,3 +23,6 @@ npm run start
 
 Finally, you can now visit the webserver at
  + http://127.0.0.1:3000/
+=======
+ 
+>>>>>>> c86994ea77271d4acb84db3f8819f366da301d60
