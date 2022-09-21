@@ -8,6 +8,17 @@
  - [Jacob Pierce](https://github.com/pier116) (<jacob.pierce@ou.edu>) | Front End Developer
  - [Aayush Dalal](https://github.com/) (<aayush.dalal@ou.edu>) | Project Manager
 
-## Design
+## Instructions
 
-For information on the design and early decisions, head over to the [Design Document](design.md).
+First, install the dependencies
+```bash
+npm install
+```
+
+Next, start the webserver
+```bash
+npm run start
+```
+
+Finally, you can now visit the webserver at
+ + http://127.0.0.1:3000/
