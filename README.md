@@ -23,6 +23,3 @@ npm run start
 
 Finally, you can now visit the webserver at
  + http://127.0.0.1:3000/
-=======
- 
->>>>>>> c86994ea77271d4acb84db3f8819f366da301d60
