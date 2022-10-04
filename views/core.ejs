@@ -6,11 +6,30 @@
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Discourse Core</title>
+
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" href="global.css">
 </head>
 
 <body>
-	<!-- <script src="/socket.io/socket.io.js"></script>
-	<script src="/scripts/webrtc.js"></script> -->
+	<div id="videos" class="container d-flex align-items-center justify-content-center w-100 min-vh-100">
+		<video id="localVideo" class="rounded-sm video" autoplay muted></video>
+	</div>
+
+	<!-- Include JQuery for Quality of Life -->
+	<script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI="
+		crossorigin="anonymous"></script>
+	<!-- Bootstrap Dependency -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+		crossorigin="anonymous"></script>
+	<!-- simplepeer is used for WebRTC magic -->
+	<script src="/simple-peer/simplepeer.min.js"></script>
+	<!-- Socket.IO is used for signaling and the chat system -->
+	<script src="/socket.io/socket.io.js"></script>
+	<!-- The actual script file that puts everything together :) -->
+	<script src="/scripts/webrtc.js"></script>
 </body>
 
 </html>

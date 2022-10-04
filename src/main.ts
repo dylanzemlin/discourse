@@ -1,72 +1,48 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+import { auth, ConfigParams } from "express-openid-connect";
+import createSocket from "./socket";
+import { createServer, Server } from "http";
 import express from "express";
 import path from "path";
-import { ironSession } from "iron-session/express";
-import { Server } from "socket.io";
-import { createServer } from "http";
 
-declare module "iron-session" {
-	interface IronSessionData {
-		user?: {
-			id: number;
-		};
-	}
+const openidConfig: ConfigParams = {
+	authRequired: false,
+	auth0Logout: true,
+	secret: process.env.AUTH0_SECRET,
+	baseURL: process.env.AUTH0_BASE_URL,
+	clientID: process.env.AUTH0_CLIENT_ID,
+	issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL
 }
 
 const app = express();
-const session = ironSession({
-	cookieName: "discourse_session",
-	password: process.env.IRON_SECRET as string
-});
-
 app.set("view engine", "ejs");
 
+app.use(auth(openidConfig));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "../", "public")));
 
-app.get("/", session, (req, res) => {
-	// if (req.session.user?.id == null) {
-	// 	return res.redirect("/login");
-	// }
+// This is a bad idea, just share the specific modules later on
+app.use(express.static(path.join(__dirname, "../", "node_modules")));
 
-	res.render("index");
+app.get("/", (req, res) => {
+	res.render("index", {
+		user: req.oidc.user == null ? false : true
+	});
 });
 
-app.get("/login", session, (req, res) => {
-	// if (req.session.user?.id != null) {
-	// 	return res.redirect("/");
-	// }
-
-	res.render("login");
-});
-
-app.get("/core", session, (req, res) => {
-	// if (req.session.user?.id != null) {
-	// 	return res.redirect("/");
-	// }
+app.get("/core", (req, res) => {
+	// If the user is null and the dev param is not set (while in development mode), redirect to login
+	if (req.oidc?.user == null && (req.query.dev != "true" || process.env.NODE_ENV != "development")) {
+		return res.redirect("/login");
+	}
 
 	res.render("core");
 });
 
-app.post("/login", session, (req, res) => {
-	return res.status(404).end();
-});
-
-app.post("/register", session, (req, res) => {
-	return res.status(404).end();
-});
-
-const server = createServer(app);
-const io = new Server(server);
-
-// io.on("connection", (client) => {
-// 	client.on("authenticate", (socket_id) => {
-// 		client.send("authenticated", socket_id);
-// 	});
-// });
-
+const server: Server = createServer(app);
 server.listen(3000, () => {
+	createSocket(server);
 	console.log(`Listening at: http://127.0.0.1:3000/`);
 });

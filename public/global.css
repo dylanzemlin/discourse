@@ -1,0 +1,25 @@
+/* Global CSS for base styling and variables */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab&display=swap');
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+	padding: 0;
+
+	color: white;
+	font-family: 'Roboto Slab', serif;
+}
+
+html, body {
+	background-color: #121212;
+}
+
+.video {
+	border: 3px solid white;
+	transition: 0.15s ease;
+}
+
+.speaking {
+	border: 3px solid lightblue;
+	transform: scale(1.1);
+}
