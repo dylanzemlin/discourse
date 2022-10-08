@@ -20,6 +20,7 @@ const constraints = {
 
 let localStream;
 let socket;
+let uid;
 
 const configuration = {
 	"iceServers": [
@@ -110,6 +111,11 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 		console.log("message: " + event.data);
 		const json = JSON.parse(event.data);
 		switch(json.id) {
+			case "hello": {
+				const id = json.socket_id;
+				uid = id;
+			} break;
+
 			case "signal": {
 				peers[json.socket_id].signal(json.signal);
 			} break;
@@ -119,6 +125,11 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 			} break;
 
 			case "client_connected": {
+				// Ignore self
+				if(json.socket_id === uid) {
+					return;
+				}
+
 				addPeer(json.socket_id, false);
 				socket.send(JSON.stringify({
 					id: "client_connected_ack",

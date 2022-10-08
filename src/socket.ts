@@ -64,6 +64,13 @@ const createSocket = (server: Server) => {
 			});
 		});
 
+		// Tell the local client who they are
+		localSocket.send(JSON.stringify({
+			id: "hello",
+			socket_id: localSocket.uid
+		}));
+
+		// Send everyone the new client connection deets
 		broadcast({
 			id: "client_connected",
 			uid: localSocket.uid
