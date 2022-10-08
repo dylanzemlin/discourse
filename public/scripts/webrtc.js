@@ -95,7 +95,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 	localStream = stream;
 
 	// TODO: Adjust based on environment variables
-	const socket = new WebSocket("ws://discourse.dylanzeml.in");
+	const socket = new WebSocket("wss://discourse.dylanzeml.in/socket");
 	console.log("socket");
 	socket.addEventListener("open", () => {
 		// Show the local video when the client has connected to the server

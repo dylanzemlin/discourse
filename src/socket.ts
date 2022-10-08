@@ -12,7 +12,7 @@ const clients: Record<string, ws.WebSocket> = {};
 const createSocket = (server: Server) => {
 	const wss = new ws.WebSocketServer({
 		noServer: true,
-		path: "/"
+		path: "/socket"
 	});
 
 	// Manually handle upgrade request
