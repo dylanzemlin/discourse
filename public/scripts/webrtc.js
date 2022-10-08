@@ -23,26 +23,12 @@ let socket;
 let uid;
 
 const configuration = {
-	"iceServers": [
+	iceServers: [
 		{
-			urls: "stun:openrelay.metered.ca:80"
+			urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
 		},
-		{
-			urls: "turn:openrelay.metered.ca:80",
-			username: "openrelayproject",
-			credential: "openrelayproject"
-		},
-		{
-			urls: "turn:openrelay.metered.ca:443",
-			username: "openrelayproject",
-			credential: "openrelayproject"
-		},
-		{
-			urls: "turn:openrelay.metered.ca:443?transport=tcp",
-			username: "openrelayproject",
-			credential: "openrelayproject"
-		}
-	]
+	],
+	iceCandidatePoolSize: 10,
 }
 
 function removePeer(socket_id) {
@@ -104,7 +90,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 
 	socket.addEventListener("message", (event) => {
 		const data = JSON.parse(event.data);
-		switch(data.id) {
+		switch (data.id) {
 			case "hello": {
 				const id = data.socket_id;
 				uid = id;
@@ -126,7 +112,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 					socket_id: data.socket_id
 				}));
 			} break;
-			
+
 			case "client_connected_ack": {
 				addPeer(data.socket_id, true);
 			} break
@@ -134,7 +120,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 	});
 
 	socket.addEventListener("close", () => {
-		for(const id in peers) {
+		for (const id in peers) {
 			removePeer(id);
 		}
 	});
