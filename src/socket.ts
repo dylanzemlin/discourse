@@ -38,9 +38,9 @@ const createSocket = (server: Server) => {
 
 		localSocket.on("message", (raw: string) => {
 			const data = JSON.parse(raw);
-			switch(data.id) {
+			switch (data.id) {
 				case "signal": {
-					if(!clients[data.socket_id]) {
+					if (!clients[data.socket_id]) {
 						return;
 					}
 
@@ -75,10 +75,16 @@ const createSocket = (server: Server) => {
 		}));
 
 		// Send everyone the new client connection deets
-		broadcast({
-			id: "client_connected",
-			socket_id: localSocket.uid
-		});
+		for (const sock of wss.clients) {
+			if (sock.uid === localSocket.uid) {
+				continue;
+			}
+
+			sock.send(JSON.stringify({
+				id: "client_connected",
+				socket_id: localSocket.uid
+			}));
+		}
 	});
 
 	return wss;
