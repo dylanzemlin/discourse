@@ -29,7 +29,7 @@ const createSocket = (server: Server) => {
 		});
 	
 		client.on("initSend", init_socket_id => {
-			peers[init_socket_id].emit("initSeed", client.id);
+			peers[init_socket_id].emit("initSend", client.id);
 		});
 	});
 }
