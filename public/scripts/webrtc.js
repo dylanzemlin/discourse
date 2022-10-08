@@ -72,7 +72,23 @@ function addPeer(socket_id, am_initiator) {
 		newVid.onclick = () => openPictureMode(newVid)
 		newVid.ontouchstart = (e) => openPictureMode(newVid)
 		videos.appendChild(newVid)
-	})
+	});
+
+	peers[socket_id].on("close", () => {
+		console.log("connection to " + socket_id + " closed");
+	});
+
+	peers[socket_id].on("error", (err) => {
+		console.log("error with " + socket_id + ": " + err);
+	});
+
+	peers[socket_id].on("connect", () => {
+		console.log("connected to " + socket_id);
+	});
+
+	setTimeout(() => {
+
+	}, 5000);
 }
 
 function openPictureMode(el) {
