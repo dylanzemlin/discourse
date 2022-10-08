@@ -62,7 +62,6 @@ function removePeer(socket_id) {
 }
 
 function addPeer(socket_id, am_initiator) {
-	console.log("creating new peer")
 	peers[socket_id] = new SimplePeer({
 		initiator: am_initiator,
 		stream: localStream,
@@ -70,7 +69,10 @@ function addPeer(socket_id, am_initiator) {
 	})
 
 	peers[socket_id].on('signal', data => {
-		console.log("on peer signal");
+		if(data.renegotiate || data.transceiverRequest) {
+			return;
+		}
+
 		socket.send(JSON.stringify({
 			id: "signal",
 			signal: data,
@@ -79,7 +81,6 @@ function addPeer(socket_id, am_initiator) {
 	})
 
 	peers[socket_id].on('stream', stream => {
-		console.log('on stream');
 		let newVid = document.createElement('video');
 		newVid.srcObject = stream
 		newVid.id = socket_id
@@ -102,35 +103,33 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 	// TODO: Adjust based on environment variables
 	socket = new WebSocket("wss://discourse.dylanzeml.in/socket");
 	socket.addEventListener("open", () => {
-		// Show the local video when the client has connected to the server
-		console.log("open");
 		localVideo.srcObject = stream;
 	});
 
 	socket.addEventListener("message", (event) => {
-		console.log("message: " + event.data);
-		const json = JSON.parse(event.data);
-		switch(json.id) {
+		const data = JSON.parse(event.data);
+		switch(data.id) {
 			case "hello": {
-				const id = json.socket_id;
+				const id = data.socket_id;
 				uid = id;
 			} break;
 
 			case "signal": {
-				peers[json.socket_id].signal(json.signal);
+				console.log(data.signal);
+				peers[data.socket_id].signal(data.signal);
 			} break;
 
 			case "client_disconnected": {
-				removePeer(json.socket_id);
+				removePeer(data.socket_id);
 			} break;
 
 			case "client_connected": {
 				// Ignore self
-				if(json.socket_id === uid) {
+				if(data.socket_id === uid) {
 					return;
 				}
 
-				addPeer(json.socket_id, false);
+				addPeer(data.socket_id, false);
 				socket.send(JSON.stringify({
 					id: "client_connected_ack",
 					socket_id: uid
@@ -138,13 +137,12 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 			} break;
 			
 			case "client_connected_ack": {
-				addPeer(json.socket_id, true);
+				addPeer(data.socket_id, true);
 			} break
 		}
 	});
 
 	socket.addEventListener("close", () => {
-		console.log("close");
 		for(const id in peers) {
 			removePeer(id);
 		}

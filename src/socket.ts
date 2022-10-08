@@ -36,19 +36,23 @@ const createSocket = (server: Server) => {
 		localSocket.uid = v4();
 		clients[localSocket.uid] = localSocket;
 
-		localSocket.on("message", (data: string) => {
-			const json = JSON.parse(data);
-			switch(json.id) {
+		localSocket.on("message", (raw: string) => {
+			const data = JSON.parse(raw);
+			switch(data.id) {
 				case "signal": {
-					clients[json.socket_id]?.send(JSON.stringify({
+					if(!clients[data.socket_id]) {
+						return;
+					}
+
+					clients[data.socket_id]?.send(JSON.stringify({
 						id: "signal",
 						socket_id: localSocket.uid,
-						signal: json.signal
+						signal: data.signal
 					}))
 				} break;
 
 				case "client_connected_ack": {
-					clients[json.socket_id]?.send(JSON.stringify({
+					clients[data.socket_id]?.send(JSON.stringify({
 						id: "client_connected_ack",
 						socket_id: localSocket.uid
 					}));
