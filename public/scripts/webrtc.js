@@ -71,10 +71,11 @@ function addPeer(socket_id, am_initiator) {
 
 	peers[socket_id].on('signal', data => {
 		console.log("on peer signal");
-		socket.emit('signal', {
+		socket.send(JSON.stringify({
+			id: "signal",
 			signal: data,
 			socket_id: socket_id
-		})
+		}));
 	})
 
 	peers[socket_id].on('stream', stream => {
@@ -99,8 +100,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 	localStream = stream;
 
 	// TODO: Adjust based on environment variables
-	const socket = new WebSocket("wss://discourse.dylanzeml.in/socket");
-	console.log("socket");
+	socket = new WebSocket("wss://discourse.dylanzeml.in/socket");
 	socket.addEventListener("open", () => {
 		// Show the local video when the client has connected to the server
 		console.log("open");
