@@ -64,12 +64,9 @@ const createSocket = (server: Server) => {
 			});
 		});
 
-		// Init Receive
-		localSocket.on("open", () => {
-			broadcast({
-				id: "client_connected",
-				uid: localSocket.uid
-			})
+		broadcast({
+			id: "client_connected",
+			uid: localSocket.uid
 		});
 	});
 
