@@ -124,11 +124,6 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 			} break;
 
 			case "client_connected": {
-				// Ignore self
-				if(data.socket_id === uid) {
-					return;
-				}
-
 				addPeer(data.socket_id, false);
 				socket.send(JSON.stringify({
 					id: "client_connected_ack",
