@@ -73,7 +73,7 @@ const createSocket = (server: Server) => {
 		// Send everyone the new client connection deets
 		broadcast({
 			id: "client_connected",
-			uid: localSocket.uid
+			socket_id: localSocket.uid
 		});
 	});
 
