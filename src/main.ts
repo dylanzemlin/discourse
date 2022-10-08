@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 dotenv.config();
 
+console.log("Node Environment: " + process.env.NODE_ENV);
+
 import { auth, ConfigParams } from "express-openid-connect";
 import createSocket from "./socket";
 import { createServer, Server } from "http";
