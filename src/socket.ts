@@ -40,18 +40,18 @@ const createSocket = (server: Server) => {
 			const json = JSON.parse(data);
 			switch(json.id) {
 				case "signal": {
-					clients[json.socket_id]?.send({
+					clients[json.socket_id]?.send(JSON.stringify({
 						id: "signal",
 						socket_id: json.socket_id,
 						signal: json.signal
-					})
+					}))
 				} break;
 
 				case "client_connected_ack": {
-					clients[json.socket_id]?.send({
+					clients[json.socket_id]?.send(JSON.stringify({
 						id: "client_connected_ack",
 						socket_id: localSocket.uid
-					});
+					}));
 				} break;
 			}
 		});
