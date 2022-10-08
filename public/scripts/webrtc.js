@@ -4,7 +4,7 @@
 
 const peers = {};
 const constraints = {
-	audio: true,
+	audio: false,
 	video: {
 		width: {
 			max: 300
@@ -18,7 +18,7 @@ const constraints = {
 	}
 }
 
-let stream;
+let localStream;
 let socket;
 
 const configuration = {
@@ -88,134 +88,51 @@ function addPeer(socket_id, am_initiator) {
 }
 
 function openPictureMode(el) {
-	console.log('opening pip')
-	el.requestPictureInPicture()
+	el.requestPictureInPicture();
 }
 
-function switchMedia() {
-	if (constraints.video.facingMode.ideal === 'user') {
-		constraints.video.facingMode.ideal = 'environment'
-	} else {
-		constraints.video.facingMode.ideal = 'user'
-	}
+navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+	localStream = stream;
 
-	const tracks = localStream.getTracks();
-
-	tracks.forEach(function (track) {
-		track.stop()
-	})
-
-	localVideo.srcObject = null
-	navigator.mediaDevices.getUserMedia(constraints).then(stream => {
-
-		for (let socket_id in peers) {
-			for (let index in peers[socket_id].streams[0].getTracks()) {
-				for (let index2 in stream.getTracks()) {
-					if (peers[socket_id].streams[0].getTracks()[index].kind === stream.getTracks()[index2].kind) {
-						peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], stream.getTracks()[index2], peers[socket_id].streams[0])
-						break;
-					}
-				}
-			}
-		}
-
-		localStream = stream
-		localVideo.srcObject = stream
-
-		updateButtons()
-	})
-}
-
-function setScreen() {
-	navigator.mediaDevices.getDisplayMedia().then(stream => {
-		for (let socket_id in peers) {
-			for (let index in peers[socket_id].streams[0].getTracks()) {
-				for (let index2 in stream.getTracks()) {
-					if (peers[socket_id].streams[0].getTracks()[index].kind === stream.getTracks()[index2].kind) {
-						peers[socket_id].replaceTrack(peers[socket_id].streams[0].getTracks()[index], stream.getTracks()[index2], peers[socket_id].streams[0])
-						break;
-					}
-				}
-			}
-
-		}
-		localStream = stream
-
-		localVideo.srcObject = localStream
-		socket.emit('removeUpdatePeer', '')
-	})
-	updateButtons()
-}
-
-function removeLocalStream() {
-	if (localStream) {
-		const tracks = localStream.getTracks();
-
-		tracks.forEach(function (track) {
-			track.stop()
-		})
-
-		localVideo.srcObject = null
-	}
-
-	for (let socket_id in peers) {
-		removePeer(socket_id)
-	}
-}
-
-function toggleMute() {
-	for (let index in localStream.getAudioTracks()) {
-		localStream.getAudioTracks()[index].enabled = !localStream.getAudioTracks()[index].enabled
-		muteButton.innerText = localStream.getAudioTracks()[index].enabled ? "Unmuted" : "Muted"
-	}
-}
-
-function toggleVid() {
-	for (let index in localStream.getVideoTracks()) {
-		localStream.getVideoTracks()[index].enabled = !localStream.getVideoTracks()[index].enabled
-		vidButton.innerText = localStream.getVideoTracks()[index].enabled ? "Video Enabled" : "Video Disabled"
-	}
-}
-
-function updateButtons() {
-	for (let index in localStream.getVideoTracks()) {
-		vidButton.innerText = localStream.getVideoTracks()[index].enabled ? "Video Enabled" : "Video Disabled"
-	}
-	for (let index in localStream.getAudioTracks()) {
-		muteButton.innerText = localStream.getAudioTracks()[index].enabled ? "Unmuted" : "Muted"
-	}
-}
-
-navigator.mediaDevices.getUserMedia(constraints).then(s => {
-	stream = s;
-	localVideo.srcObject = s;
-
-	socket = io();
-	socket.on('initReceive', socket_id => {
-		console.log('INIT RECEIVE ' + socket_id);
-		addPeer(socket_id, false);
-
-		socket.emit('initSend', socket_id);
+	// TODO: Adjust based on environment variables
+	const socket = new WebSocket("ws://127.0.0.1:3000");
+	console.log("socket");
+	socket.addEventListener("open", () => {
+		// Show the local video when the client has connected to the server
+		console.log("open");
+		localVideo.srcObject = stream;
 	});
 
-	socket.on('initSend', socket_id => {
-		console.log('INIT SEND ' + socket_id);
-		addPeer(socket_id, true);
-	})
+	socket.addEventListener("message", (event) => {
+		console.log("message: " + event.data);
+		const json = JSON.parse(event.data);
+		switch(json.id) {
+			case "signal": {
+				peers[json.socket_id].signal(json.signal);
+			} break;
 
-	socket.on('removePeer', socket_id => {
-		console.log('removing peer ' + socket_id);
-		removePeer(socket_id);
-	})
+			case "client_disconnected": {
+				removePeer(json.socket_id);
+			} break;
 
-	socket.on('disconnect', () => {
-		console.log('GOT DISCONNECTED')
-		for (let socket_id in peers) {
-			removePeer(socket_id);
+			case "client_connected": {
+				addPeer(json.socket_id, false);
+				socket.send(JSON.stringify({
+					id: "client_connected_ack",
+					socket_id: socket_id
+				}));
+			} break;
+			
+			case "client_connected_ack": {
+				addPeer(json.socket_id, true);
+			} break
 		}
-	})
+	});
 
-	socket.on('signal', data => {
-		peers[data.socket_id].signal(data.signal);
-	})
+	socket.addEventListener("close", () => {
+		console.log("close");
+		for(const id in peers) {
+			removePeer(id);
+		}
+	});
 });
