@@ -69,10 +69,6 @@ function addPeer(socket_id, am_initiator) {
 	})
 
 	peers[socket_id].on('signal', data => {
-		if(data.renegotiate || data.transceiverRequest) {
-			return;
-		}
-
 		socket.send(JSON.stringify({
 			id: "signal",
 			signal: data,
