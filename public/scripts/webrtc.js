@@ -61,6 +61,7 @@ function removePeer(socket_id) {
 }
 
 function addPeer(socket_id, am_initiator) {
+	console.log("creating new peer")
 	peers[socket_id] = new SimplePeer({
 		initiator: am_initiator,
 		stream: localStream,
@@ -68,6 +69,7 @@ function addPeer(socket_id, am_initiator) {
 	})
 
 	peers[socket_id].on('signal', data => {
+		console.log("on peer signal");
 		socket.emit('signal', {
 			signal: data,
 			socket_id: socket_id
@@ -75,7 +77,8 @@ function addPeer(socket_id, am_initiator) {
 	})
 
 	peers[socket_id].on('stream', stream => {
-		let newVid = document.createElement('video')
+		console.log('on stream');
+		let newVid = document.createElement('video');
 		newVid.srcObject = stream
 		newVid.id = socket_id
 		newVid.playsinline = false
