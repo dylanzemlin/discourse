@@ -44,7 +44,7 @@ app.get("/core", (req, res) => {
 });
 
 const server: Server = createServer(app);
-server.listen(3000, () => {
+server.listen(process.env.PORT ?? 3000, () => {
 	createSocket(server);
-	console.log(`Listening at: http://127.0.0.1:3000/`);
+	console.log(`Listening at: http://127.0.0.1:${process.env.PORT ?? 3000}/`);
 });
