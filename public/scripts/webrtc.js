@@ -2,7 +2,7 @@
 // Currently using the script from this repository. Lots of changes will be made in the future to adapt it
 // to our project.
 
-const peers = {};
+var peers = {};
 const constraints = {
   audio: true,
   video: {
@@ -26,22 +26,7 @@ const configuration = {
   iceServers: [
     {
       urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-    },
-    {
-      urls: "turn:openrelay.metered.ca:80",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
-    {
-      urls: "turn:openrelay.metered.ca:443?transport=tcp",
-      username: "openrelayproject",
-      credential: "openrelayproject",
-    },
+    }
   ],
   iceCandidatePoolSize: 10,
 }
@@ -91,10 +76,15 @@ function addPeer(socket_id, am_initiator) {
 
   peers[socket_id].on("close", () => {
     console.log("connection to " + socket_id + " closed");
+    delete peers[socket_id];
   });
 
   peers[socket_id].on("error", (err) => {
     console.log("error with " + socket_id + ": " + err);
+  });
+
+  peers[socket_id].on("data", (data) => {
+    console.log(`Received data from ${socket_id}: ${data}`);
   });
 
   peers[socket_id].on("connect", () => {
