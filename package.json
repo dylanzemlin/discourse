@@ -4,7 +4,8 @@
   "description": "[Discourse](https://discourse.dylanzeml.in/) is a single channel voice application made for CS 3202 (Software Engineering) at the University of Oklahoma. Its primary purpose is to allow users to talk to eachother and have fun while avoiding the need to create channels and servers.",
   "main": "index.js",
   "scripts": {
-    "start": "rimraf dist && tsc && cross-env NODE_ENV=development node dist/main.js"
+    "start": "rimraf dist && tsc && cross-env NODE_ENV=production node dist/main.js",
+    "dev": "rimraf dist && tsc && cross-env NODE_ENV=development node dist/main.js"
   },
   "repository": {
     "type": "git",
