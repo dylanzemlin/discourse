@@ -99,7 +99,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 	localStream = stream;
 
 	// TODO: Adjust based on environment variables
-	socket = new WebSocket("wss://discourse.dylanzeml.in/socket");
+	socket = new WebSocket(window.node_env === "production" ? "wss://discourse.dylanzeml.in/socket" : `ws://127.0.0.1:${window.node_port}/socket`);
 	socket.addEventListener("open", () => {
 		localVideo.srcObject = stream;
 	});

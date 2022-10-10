@@ -40,7 +40,10 @@ app.get("/core", (req, res) => {
 		return res.redirect("/login");
 	}
 
-	res.render("core");
+	res.render("core", {
+    node_env: process.env.NODE_ENV,
+    node_port: process.env.PORT ?? 3000
+  });
 });
 
 const server: Server = createServer(app);

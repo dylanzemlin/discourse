@@ -17,6 +17,14 @@
 		<video id="localVideo" class="rounded-sm video" autoplay muted></video>
 	</div>
 
+  <!-- Inject node environment and port -->
+  <% if(node_env) { %>
+    <script>
+      window.node_env = "<%= node_env %>";
+      window.node_port = "<%= node_port %>";
+    </script>
+  <% } %>
+
 	<!-- Include JQuery for Quality of Life -->
 	<script src="https://code.jquery.com/jquery-3.6.1.js" integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI="
 		crossorigin="anonymous"></script>
