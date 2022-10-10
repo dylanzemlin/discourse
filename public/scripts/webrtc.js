@@ -99,6 +99,10 @@ function addPeer(socket_id, am_initiator) {
 
   peers[socket_id].on("connect", () => {
     console.log("connected to " + socket_id);
+
+    setInterval(() => {
+      peers[socket_id].send("ping");
+    }, 3000);
   });
 }
 
