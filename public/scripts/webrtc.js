@@ -85,10 +85,6 @@ function addPeer(socket_id, am_initiator) {
 	peers[socket_id].on("connect", () => {
 		console.log("connected to " + socket_id);
 	});
-
-	setTimeout(() => {
-
-	}, 5000);
 }
 
 function openPictureMode(el) {
@@ -118,6 +114,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 			} break;
 
 			case "client_disconnected": {
+        console.log(`Client Disconnect: Removing peer ${data.socket_id}`);
 				removePeer(data.socket_id);
 			} break;
 
@@ -137,6 +134,7 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 
 	socket.addEventListener("close", () => {
 		for (const id in peers) {
+      console.log(`Connection closed: Removing peer ${id}`);
 			removePeer(id);
 		}
 	});
