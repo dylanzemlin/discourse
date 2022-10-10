@@ -36,9 +36,9 @@ app.get("/", (req, res) => {
 
 app.get("/core", (req, res) => {
 	// If the user is null and the dev param is not set (while in development mode), redirect to login
-	if (req.oidc?.user == null && (req.query.dev != "true" || process.env.NODE_ENV != "development")) {
-		return res.redirect("/login");
-	}
+	// if (req.oidc?.user == null && (req.query.dev != "true" || process.env.NODE_ENV != "development")) {
+	// 	return res.redirect("/login");
+	// }
 
 	res.render("core", {
     node_env: process.env.NODE_ENV,
