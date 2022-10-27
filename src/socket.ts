@@ -1,6 +1,15 @@
+import Filter from "bad-words";
 import { Server } from "http";
 import { v4 } from "uuid";
 import ws from "ws";
+
+const filter = new Filter();
+let chatHistory: {
+	socket_id: string;
+	message: string;
+}[] = [];
+let lastChat = Date.now();
+let lastChats: Record<string, number> = {};
 
 declare module "ws" {
 	export interface WebSocket extends ws {
@@ -38,7 +47,7 @@ const createSocket = (server: Server) => {
 
 		localSocket.on("message", (data: string) => {
 			const json = JSON.parse(data);
-			switch(json.id) {
+			switch (json.id) {
 				case "signal": {
 					clients[json.socket_id]?.send({
 						id: "signal",
@@ -50,6 +59,43 @@ const createSocket = (server: Server) => {
 				case "client_connected_ack": {
 					clients[json.socket_id]?.send({
 						id: "client_connected_ack",
+						socket_id: localSocket.uid
+					});
+				} break;
+
+				case "chat_message": {
+					// Ensure the message is not undefined and has at least 1 character
+					if (json.message == undefined || json.message == "" || typeof json.message != "string" || json.message.trim().length <= 0) {
+						return;
+					}
+
+					// If it has been 1 hour since the last message, clear the history
+					if (Date.now() - lastChat > 1 * 60 * 60 * 1000) {
+						chatHistory = [];
+					}
+
+					// If the user has sent a second message within the last 1.5 seconds, ignore it
+					if (Date.now() - lastChats[localSocket.uid] < 1500) {
+						return;
+					}
+					lastChats[localSocket.uid] = Date.now();
+
+					// Clean the message and push it to the history
+					const message = filter.clean(json.message);
+					chatHistory.push({
+						socket_id: localSocket.uid,
+						message
+					});
+
+					// Ensure the history has at most 50 messages
+					if (chatHistory.length > 50) {
+						chatHistory.shift();
+					}
+
+					// Send the cleaned message to all clients
+					broadcast({
+						id: "chat_message",
+						message: message,
 						socket_id: localSocket.uid
 					});
 				} break;
@@ -67,6 +113,14 @@ const createSocket = (server: Server) => {
 		broadcast({
 			id: "client_connected",
 			uid: localSocket.uid
+		});
+
+		chatHistory.forEach((message) => {
+			localSocket.send(JSON.stringify({
+				id: "chat_message",
+				message: message.message,
+				socket_id: message.socket_id
+			}));
 		});
 	});
 

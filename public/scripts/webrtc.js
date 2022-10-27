@@ -2,6 +2,8 @@
 // Currently using the script from this repository. Lots of changes will be made in the future to adapt it
 // to our project.
 
+let local_socket_id = undefined;
+
 const peers = {};
 const constraints = {
 	audio: false,
@@ -95,18 +97,26 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 	localStream = stream;
 
 	// TODO: Adjust based on environment variables
-	const socket = new WebSocket("wss://discourse.dylanzeml.in/socket");
-	console.log("socket");
+	const socket = new WebSocket(environment === "development" ? "ws://localhost:3000/socket" : "wss://discourse.dylanzeml.in/socket");
 	socket.addEventListener("open", () => {
 		// Show the local video when the client has connected to the server
 		console.log("open");
 		localVideo.srcObject = stream;
 	});
 
+	$("#chat_form").submit((e) => {
+		e.preventDefault();
+		socket.send(JSON.stringify({
+			id: "chat_message",
+			message: $("#chat_input").val()
+		}));
+		$("#chat_input").val("");
+	});
+
 	socket.addEventListener("message", (event) => {
 		console.log("message: " + event.data);
 		const json = JSON.parse(event.data);
-		switch(json.id) {
+		switch (json.id) {
 			case "signal": {
 				peers[json.socket_id].signal(json.signal);
 			} break;
@@ -116,22 +126,36 @@ navigator.mediaDevices.getUserMedia(constraints).then(stream => {
 			} break;
 
 			case "client_connected": {
+				if(local_socket_id == undefined) {
+					local_socket_id = json.socket_id;
+				}
+
 				addPeer(json.socket_id, false);
 				socket.send(JSON.stringify({
 					id: "client_connected_ack",
-					socket_id: socket_id
+					socket_id: local_socket_id
 				}));
 			} break;
-			
+
 			case "client_connected_ack": {
 				addPeer(json.socket_id, true);
 			} break
+
+			case "chat_message": {
+				const newMessage = $('<div class="d-flex"></div>');
+				newMessage.className = "container d-flex";
+
+				const newMessageText = $(`<p class="text-center mb-0"><small class="font-weight-bold text-center mb-0">${json.socket_id}:&nbsp;</small>${json.message}</p>`)
+
+				newMessage.append(newMessageText);
+				$("#chat_container").append(newMessage);
+			} break;
 		}
 	});
 
 	socket.addEventListener("close", () => {
 		console.log("close");
-		for(const id in peers) {
+		for (const id in peers) {
 			removePeer(id);
 		}
 	});
