@@ -38,7 +38,7 @@ const createSocket = (server: Server) => {
 
 		localSocket.on("message", (data: string) => {
 			const json = JSON.parse(data);
-			switch(json.id) {
+			switch (json.id) {
 				case "signal": {
 					clients[json.socket_id]?.send({
 						id: "signal",
@@ -53,6 +53,14 @@ const createSocket = (server: Server) => {
 						socket_id: localSocket.uid
 					});
 				} break;
+
+				case "chat_message": {
+					broadcast({
+						id: "chat_message",
+						message: json.message,
+						socket_id: localSocket.uid
+					});
+				}
 			}
 		});
 
