@@ -1,37 +1,40 @@
 {
-  "name": "discourse",
-  "version": "1.0.0",
-  "description": "[Discourse](https://discourse.dylanzeml.in/) is a single channel voice application made for CS 3202 (Software Engineering) at the University of Oklahoma. Its primary purpose is to allow users to talk to eachother and have fun while avoiding the need to create channels and servers.",
-  "main": "index.js",
-  "scripts": {
-    "start": "rimraf dist && tsc && cross-env NODE_ENV=development node dist/main.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dylanzemlin/discourse.git"
-  },
-  "author": "",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/dylanzemlin/discourse/issues"
-  },
-  "homepage": "https://github.com/dylanzemlin/discourse#readme",
-  "devDependencies": {
-    "@types/express": "^4.17.14",
-    "@types/uuid": "^8.3.4",
-    "@types/ws": "^8.5.3",
-    "copyfiles": "^2.4.1",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.8.3"
-  },
-  "dependencies": {
-    "cross-env": "^7.0.3",
-    "dotenv": "^16.0.2",
-    "ejs": "^3.1.8",
-    "express": "^4.18.1",
-    "express-openid-connect": "^2.8.0",
-    "simple-peer": "^9.11.1",
-    "uuid": "^9.0.0",
-    "ws": "^8.9.0"
-  }
+	"name": "discourse",
+	"version": "1.0.0",
+	"description": "[Discourse](https://discourse.dylanzeml.in/) is a single channel voice application made for CS 3202 (Software Engineering) at the University of Oklahoma. Its primary purpose is to allow users to talk to eachother and have fun while avoiding the need to create channels and servers.",
+	"main": "index.js",
+	"scripts": {
+		"start": "rimraf dist && tsc && cross-env NODE_ENV=production node dist/main.js",
+		"dev": "rimraf dist && tsc && cross-env NODE_ENV=development node dist/main.js"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/dylanzemlin/discourse.git"
+	},
+	"author": "",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/dylanzemlin/discourse/issues"
+	},
+	"homepage": "https://github.com/dylanzemlin/discourse#readme",
+	"devDependencies": {
+		"@types/bad-words": "^3.0.1",
+		"@types/express": "^4.17.14",
+		"@types/uuid": "^8.3.4",
+		"@types/ws": "^8.5.3",
+		"copyfiles": "^2.4.1",
+		"rimraf": "^3.0.2",
+		"typescript": "^4.8.3"
+	},
+	"dependencies": {
+		"bad-words": "^3.0.4",
+		"cross-env": "^7.0.3",
+		"dotenv": "^16.0.2",
+		"ejs": "^3.1.8",
+		"express": "^4.18.1",
+		"express-openid-connect": "^2.8.0",
+		"simple-peer": "^9.11.1",
+		"uuid": "^9.0.0",
+		"ws": "^8.9.0"
+	}
 }

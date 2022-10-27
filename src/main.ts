@@ -40,7 +40,9 @@ app.get("/core", (req, res) => {
 		return res.redirect("/login");
 	}
 
-	res.render("core");
+	res.render("core", {
+		environment: process.env.NODE_ENV
+	});
 });
 
 const server: Server = createServer(app);
