@@ -33,8 +33,12 @@ app.use(express.static(path.join(__dirname, "../", "public")));
 app.use(express.static(path.join(__dirname, "../", "node_modules")));
 
 app.get("/", (req, res) => {
+	const redir_base = process.env.NODE_ENV === "production" ? "https://discourse.dylanzeml.in" : "http://localhost:3000";
+
+	// TODO: Add stateful authentication for security?
   res.render("index", {
     user: req.oidc.user == null ? false : true,
+		github_url: `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${redir_base}/oauth/github`,
   });
 });
 
@@ -103,6 +107,23 @@ app.post("/register", async (req, res) => {
 });
 
 app.post("/oauth/github", (req, res) => {
+	const { code, state } = req.body;
+	if(code == null || state == null) {
+		return res.status(400).send("Invalid body");
+	}
+	
+	const params = new URLSearchParams({
+		client_id: process.env.GITHUB_CLIENT_ID as string,
+		client_secret: process.env.GITHUB_CLIENT_SECRET as string,
+		code,
+		redirect_uri: ""
+	});
+	const url = `https://github.com/login/oauth/access_token${params.toString()}`;
+	const result = fetch(url, {
+		method: "POST"
+	});
+
+	console.log(result);
   return res.status(404).send("Not Found");
 });
 
