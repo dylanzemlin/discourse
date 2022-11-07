@@ -1,18 +1,20 @@
+// Environment configuration
 import dotenv from "dotenv";
 dotenv.config();
 
-console.log("Node Environment: " + process.env.NODE_ENV);
-
+// Firestore/firebase initialization. Will likely put file storage here soon for avatars
 import { Firestore } from "@google-cloud/firestore";
 const store = new Firestore();
 
+// General imports for passwords, express, etc
 import { auth, ConfigParams } from "express-openid-connect";
-import createSocket from "./socket";
+import { generateSalt, hashPassword } from "./crypto";
 import { createServer, Server } from "http";
+import createSocket from "./socket";
 import express from "express";
 import path from "path";
-import { generateSalt, hashPassword } from "./crypto";
 
+// Will not be needed as soon as we switch to custom authentication
 const openidConfig: ConfigParams = {
   authRequired: false,
   auth0Logout: true,
@@ -22,6 +24,10 @@ const openidConfig: ConfigParams = {
   issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
 };
 
+// Dynamic urls for authentication and routing
+const redir_base = process.env.NODE_ENV === "production" ? "https://discourse.dylanzeml.in" : "http://localhost:3000";
+
+// Creates the default express app with a static directory, json as the body, and the openid middleware
 const app = express();
 app.set("view engine", "ejs");
 
@@ -33,19 +39,11 @@ app.use(express.static(path.join(__dirname, "../", "public")));
 app.use(express.static(path.join(__dirname, "../", "node_modules")));
 
 app.get("/", (req, res) => {
-	const redir_base = process.env.NODE_ENV === "production" ? "https://discourse.dylanzeml.in" : "http://localhost:3000";
-
 	// TODO: Add stateful authentication for security?
   res.render("index", {
     user: req.oidc.user == null ? false : true,
 		github_url: `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${redir_base}/oauth/github`,
   });
-});
-
-app.get("/status", async (req, res) => {
-  const test = store.collection("example").doc("test");
-  const doc = await test.get();
-  res.json(doc.data());
 });
 
 app.post("/login", async (req, res) => {
@@ -123,6 +121,8 @@ app.post("/oauth/github", (req, res) => {
 		method: "POST"
 	});
 
+	// TODO: Create account or 
+
 	console.log(result);
   return res.status(404).send("Not Found");
 });
@@ -131,15 +131,26 @@ app.post("/oauth/google", (req, res) => {
   return res.status(404).send("Not Found");
 });
 
+app.get("/profile", (req, res) => {
+	// TODO: Return the user profile from firestore
+	return res.status(404).send("Not Found");
+});
+
+app.patch("/profile", (req, res) => {
+	// TODO: Verify the body and update the users profile accordingly
+	return res.status(404).send("Not Found");
+});
+
 app.get("/core", (req, res) => {
-  // If the user is null and the dev param is not set (while in development mode), redirect to login
+  // If the user is null and the dev param is not set (while in development mode), redirect to home page
   if (
     req.oidc?.user == null &&
     (req.query.dev != "true" || process.env.NODE_ENV != "development")
   ) {
-    return res.redirect("/login");
+    return res.redirect("/");
   }
 
+	// TODO: Remove the ?? {} when we switch to custom authentication fully
   res.render("core", {
     environment: process.env.NODE_ENV,
     user: req.oidc.user ?? {
@@ -151,7 +162,7 @@ app.get("/core", (req, res) => {
 });
 
 const server: Server = createServer(app);
-server.listen(3000, () => {
+server.listen(process.env.PORT, () => {
   createSocket(server);
-  console.log(`Listening at: http://127.0.0.1:3000/`);
+  console.log(`Listening at: http://127.0.0.1:${process.env.PORT}/`);
 });

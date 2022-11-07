@@ -11,7 +11,7 @@ const constraints = {
     width: {
       min: 640,
       ideal: 1280,
-      max: 1920,
+      max: 1280,
     },
     height: {
       min: 480,

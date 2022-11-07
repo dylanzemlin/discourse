@@ -37,8 +37,8 @@
       </div>
     </div>
 
-    <div id="videos" class="d-flex align-items-center justify-content-center mh-100 flex-grow-1 p-lg-4">
-      <video id="localVideo" class="rounded-sm video" autoplay muted></video>
+    <div id="videos" class="mh-100 p-lg-4 w-100 h-100 d-flex">
+      <video id="localVideo" class="rounded-sm video w-25 h-25" autoplay muted></video>
     </div>
 
     <% if (environment) { %>
@@ -52,12 +52,6 @@
         var user = <%- JSON.stringify(user) %>;
       </script>
     <% } %>
-
-		<% if (github_url) { %>
-			<script>
-				var github_url = "<%= github_url %>";
-			</script>
-		<% } %>
 
     <!-- Include JQuery for Quality of Life -->
     <script src="https://code.jquery.com/jquery-3.6.1.js"
