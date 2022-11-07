@@ -15,6 +15,13 @@ First, install the dependencies
 npm install
 ```
 
+---
+
+Set the firebase service account system environment variable  
+```XYZ = service_account.json```
+
+---
+
 Next, start the webserver
 ```bash
 npm run start

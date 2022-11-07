@@ -2,53 +2,68 @@
 <html lang="en">
 
 <head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Discourse Core</title>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discourse Core</title>
 
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
-		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-	<link rel="stylesheet" href="global.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="global.css">
 </head>
 
 <body>
-	<div class="min-vh-100 w-100 d-flex">
-		<div id="chat" class="d-flex align-items-center justify-content-center mh-100 mr-auto flex-column p-lg-4">
-			<h2 class="text-center">Chat</h2>
-			<div id="chat_container" class="d-flex align-items-center p-1 flex-grow-1 flex-column">
+  <div class="min-vh-100 w-100 d-flex">
+    <div id="chat" class="d-flex align-items-center justify-content-center mh-100 mr-auto flex-column p-lg-2">
+      <h2 class="text-center">Chat</h2>
+      <div id="chat_container" class="d-flex align-items-center p-1 flex-grow-1 flex-column">
+        <!-- Will be filled up dynamically as the session continues -->
+      </div>
+      <div class="mt-auto w-100">
+        <form id="chat_form" class="form-inline w-100 d-flex justify-content-center">
+          <!-- Chat Bar | Chat text box & submit button -->
+          <input id="chat_input" type="text" class="form-control mr-2" placeholder="Enter message">
+          <button id="chat_button" type="submit" class="btn btn-primary">Send</button>
+        </form>
+        <div class="w-100 h-auto p-1 d-flex align-items-center justify-content-center mt-2">
+          <!-- Bottom Bar | Avatar/Mute/Deafen -->
+          <img id="avatar" src="<%- user.picture %>" alt="Avatar"
+            class="rounded-circle mr-2" style="width: 48px; height: 48px;">
+          <div class="d-flex align-items-center justify-content-center">
+            <button id="mute" type="button" class="btn btn-primary mr-2">Mute</button>
+            <button id="deafen" type="button" class="btn btn-primary">Deafen</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-			</div>
-			<div class="mt-auto w-100">
-				<form id="chat_form" class="form-inline w-100 d-flex justify-content-center">
-					<input id="chat_input" type="text" class="form-control mr-2" placeholder="Enter message">
-					<button id="chat_button" type="submit" class="btn btn-primary">Send</button>
-				</form>
-			</div>
-		</div>
+    <div id="videos" class="d-flex align-items-center justify-content-center mh-100 flex-grow-1 p-lg-4">
+      <video id="localVideo" class="rounded-sm video" autoplay muted></video>
+    </div>
 
-		<div id="videos" class="d-flex align-items-center justify-content-center mh-100 flex-grow-1 p-lg-4">
-			<video id="localVideo" class="rounded-sm video" autoplay muted></video>
-		</div>
-	</div>
+    <% if (environment) { %>
+      <script>
+        var environment = "<%= environment %>";
+      </script>
+      <% } %>
 
-	<% if (environment) { %>
-		<script>
-			var environment = "<%= environment %>";
-		</script>
-	<% } %>
+    <% if (user) { %>
+      <script>
+        var user = <%- JSON.stringify(user) %>;
+      </script>
+    <% } %>
 
-	<!-- Include JQuery for Quality of Life -->
-	<script src="https://code.jquery.com/jquery-3.6.1.js"
-		integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
-	<!-- Bootstrap Dependency -->
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
-		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-		crossorigin="anonymous"></script>
-	<!-- simplepeer is used for WebRTC magic -->
-	<script src="/simple-peer/simplepeer.min.js"></script>
-	<!-- The actual script file that puts everything together :) -->
-	<script src="/scripts/webrtc.js"></script>
+    <!-- Include JQuery for Quality of Life -->
+    <script src="https://code.jquery.com/jquery-3.6.1.js"
+      integrity="sha256-3zlB5s2uwoUzrXK3BT7AX3FyvojsraNFxCc2vC/7pNI=" crossorigin="anonymous"></script>
+    <!-- Bootstrap Dependency -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+      crossorigin="anonymous"></script>
+    <!-- simplepeer is used for WebRTC magic -->
+    <script src="/simple-peer/simplepeer.min.js"></script>
+    <!-- The actual script file that puts everything together :) -->
+    <script src="/scripts/webrtc.js"></script>
 </body>
 
 </html>

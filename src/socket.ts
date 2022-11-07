@@ -96,7 +96,8 @@ const createSocket = (server: Server) => {
 					broadcast({
 						id: "chat_message",
 						message: message,
-						socket_id: localSocket.uid
+						socket_id: localSocket.uid,
+						name: json.name
 					});
 				} break;
 			}
