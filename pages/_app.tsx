@@ -1,5 +1,6 @@
-import { MantineProvider } from '@mantine/core';
 import { NotificationsProvider } from '@mantine/notifications';
+import { AuthenticationProvider } from '../lib/context/auth';
+import { MantineProvider } from '@mantine/core';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
 
@@ -25,7 +26,9 @@ export default function App(props: AppProps) {
 					limit={5}
 					autoClose={5000}
 				>
-					<Component {...pageProps} />
+					<AuthenticationProvider>
+						<Component {...pageProps} />
+					</AuthenticationProvider>
 				</NotificationsProvider>
 			</MantineProvider>
 		</>
