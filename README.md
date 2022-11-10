@@ -12,7 +12,7 @@
 
 First, install the dependencies
 ```bash
-npm install
+yarn
 ```
 
 ---
@@ -24,7 +24,7 @@ Set the firebase service account system environment variable
 
 Next, start the webserver
 ```bash
-npm run start
+yarn dev
 ```
 
 Finally, you can now visit the webserver at

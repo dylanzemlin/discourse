@@ -1,43 +1,44 @@
 {
-	"name": "discourse",
-	"version": "1.0.0",
-	"description": "[Discourse](https://discourse.dylanzeml.in/) is a single channel voice application made for CS 3202 (Software Engineering) at the University of Oklahoma. Its primary purpose is to allow users to talk to eachother and have fun while avoiding the need to create channels and servers.",
-	"main": "index.js",
-	"scripts": {
-		"start": "rimraf dist && tsc && cross-env NODE_ENV=production node dist/main.js",
-		"dev": "rimraf dist && tsc && cross-env NODE_ENV=development node dist/main.js"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/dylanzemlin/discourse.git"
-	},
-	"author": "",
-	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/dylanzemlin/discourse/issues"
-	},
-	"homepage": "https://github.com/dylanzemlin/discourse#readme",
-	"devDependencies": {
-		"@types/bad-words": "^3.0.1",
-		"@types/bcrypt": "^5.0.0",
-		"@types/express": "^4.17.14",
-		"@types/uuid": "^8.3.4",
-		"@types/ws": "^8.5.3",
-		"copyfiles": "^2.4.1",
-		"rimraf": "^3.0.2",
-		"typescript": "^4.8.3"
-	},
-	"dependencies": {
-		"bad-words": "^3.0.4",
-		"bcrypt": "^5.1.0",
-		"cross-env": "^7.0.3",
-		"dotenv": "^16.0.2",
-		"ejs": "^3.1.8",
-		"express": "^4.18.1",
-		"express-openid-connect": "^2.8.0",
-		"firebase-admin": "^11.2.0",
-		"simple-peer": "^9.11.1",
-		"uuid": "^9.0.0",
-		"ws": "^8.9.0"
-	}
+  "name": "discourse",
+  "version": "1.0.0",
+  "private": false,
+	"author": "Discourse",
+	"description": "A video, voice, and chat platform to connect with people all across the world in one central room.",
+	"homepage": "https://discourse.dylanzeml.in/",
+	"contributors": [
+		{
+			"name": "Dylan Zemlin",
+			"email": "dylan.zemlin@gmail.com"
+		},
+		{
+			"name": "Aayush Dalal"
+		},
+		{
+			"name": "Jacob Pierce"
+		}
+	],
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/server": "^11.10.0",
+    "@mantine/core": "^5.7.1",
+    "@mantine/hooks": "^5.7.1",
+    "@mantine/modals": "^5.7.1",
+    "@mantine/next": "^5.7.1",
+    "@mantine/notifications": "^5.7.1",
+    "@types/node": "18.11.9",
+    "@types/react": "18.0.25",
+    "@types/react-dom": "18.0.8",
+    "eslint": "8.27.0",
+    "eslint-config-next": "13.0.2",
+    "next": "13.0.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "4.8.4"
+  }
 }
