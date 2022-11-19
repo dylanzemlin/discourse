@@ -2,6 +2,7 @@ import { useAuthentication } from "../lib/context/auth";
 import { Flex, Title } from "@mantine/core";
 import { useRouter } from "next/router";
 import Head from "next/head";
+import MediaDeviceQuery from "../components/queries/MediaDeviceQuery";
 
 export default function Home() {
 	const router = useRouter();
@@ -11,7 +12,10 @@ export default function Home() {
 	}
 
 	return (
-		<>
+		<MediaDeviceQuery
+			audio={true}
+			video={true}
+		>
 			<Head>
 				<title>Discourse - Chaos</title>
 			</Head>
@@ -24,6 +28,6 @@ export default function Home() {
 			>
 				<Title size="7rem" order={1}>CHAOS</Title>
 			</Flex >
-		</>
+			</MediaDeviceQuery>
 	)
 }
