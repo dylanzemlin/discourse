@@ -3,13 +3,19 @@ import { Flex, Title } from "@mantine/core";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import MediaDeviceQuery from "../components/queries/MediaDeviceQuery";
+import { useRef } from "react";
+import useWRTC from "../lib/webrtc/UseWRTC";
 
 export default function Home() {
+	const videoRef = useRef<HTMLVideoElement>(null);
 	const router = useRouter();
-	const state = useAuthentication();
-	if (!state.authed) {
-		return router.push("/");
-	}
+	const wrtc = useWRTC({
+		localVideoRefId: "localVideo"
+	});
+	// const state = useAuthentication();
+	// if (!state.authed) {
+	// 	return router.push("/");
+	// }
 
 	return (
 		<MediaDeviceQuery
@@ -27,6 +33,10 @@ export default function Home() {
 				direction="column"
 			>
 				<Title size="7rem" order={1}>CHAOS</Title>
+				<video id="localVideo" style={{
+					width: "100%",
+					height: "100%"
+				}} ref={videoRef}></video>
 			</Flex >
 			</MediaDeviceQuery>
 	)
