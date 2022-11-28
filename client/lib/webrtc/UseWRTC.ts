@@ -97,13 +97,11 @@ export default function useWRTC(opts: WRTCOptions) {
         } break;
 
         case PackageType.CLIENT_DISCONNECTED: {
-          const peer = peers.get(packet.uid);
-          if (peer == null) {
-            return;
-          }
+          peers.get(packet.uid)?.destroy();
+          streams.get(packet.uid)?.getTracks().forEach((track) => track.stop());
 
-          peer.destroy();
           peers.remove(packet.uid);
+          streams.remove(packet.uid);
         } break;
 
         case PackageType.CLIENT_JOINED: {
