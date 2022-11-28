@@ -19,5 +19,10 @@ export default function useDict<A extends keyof any, B>() {
     return Object.keys(dict) as A[];
   }
 
-  return { set, get, values, keys }
+  const remove = (key: A) => {
+    const { [key]: _, ...rest } = dict;
+    setDict(rest as Record<A, B>);
+  }
+
+  return { set, get, values, keys, remove }
 }

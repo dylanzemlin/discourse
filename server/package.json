@@ -2,5 +2,19 @@
   "name": "discourse-server",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "dev": "tsc && node dist/index.js"
+  },
+  "dependencies": {
+    "bad-words": "^3.0.4",
+    "uuid": "^9.0.0",
+    "ws": "^8.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.3",
+    "@types/bad-words": "^3.0.1",
+    "@types/uuid": "^8.3.4",
+    "@types/ws": "^8.5.3"
+  }
 }

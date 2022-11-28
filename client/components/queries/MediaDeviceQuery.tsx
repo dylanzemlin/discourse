@@ -26,8 +26,11 @@ const PermToState = (perm: PermissionState) => {
 
 export default function MediaDeviceQuery(props: MediaDeviceQueryProps) {
 	const [state, setState] = useState(QueryState.WAITING);
+	const isSSR = typeof window === "undefined";
 
 	useEffect(() => {
+		if(isSSR) return;
+
 		navigator.mediaDevices.getUserMedia({
 			video: props.video,
 			audio: props.audio
@@ -36,7 +39,7 @@ export default function MediaDeviceQuery(props: MediaDeviceQueryProps) {
 		}).catch(() => {
 			setState(QueryState.BLOCKED);
 		});
-	}, [props.video, props.audio]);
+	}, [props.video, props.audio, isSSR]);
 
 	switch(state) {
 		case QueryState.WAITING:
