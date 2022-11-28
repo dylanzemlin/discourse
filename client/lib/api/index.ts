@@ -41,7 +41,10 @@ export class GenericAPI {
 		}
 
 		try {
-			return result.json();
+			return {
+				status: 200,
+				data: await result.json()
+			}
 		} catch {
 			return {
 				status: result.status,

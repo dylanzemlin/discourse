@@ -68,7 +68,8 @@ export default function RegisterModal() {
 		return false;
 	}
 
-	const handleRegister = async () => {
+	const handleRegister = async (e: any) => {
+		e.preventDefault();
 		setLoading(true);
 
 		const result = await v1.REGISTER_USER(name, email, password);
@@ -99,37 +100,39 @@ export default function RegisterModal() {
 				closeOnEscape={!loading}
 				withCloseButton={!loading}
 			>
-				<Flex
-					direction="column"
-					gap="md"
-				>
-					<TextInput
-						value={name}
-						onChange={(e) => setName(e.currentTarget.value)}
-						placeholder="John Doe"
-						withAsterisk
-						variant="filled"
-						label="Full Name"
-					/>
-					<TextInput
-						value={email}
-						onChange={(e) => setEmail(e.currentTarget.value)}
-						placeholder="Email"
-						withAsterisk
-						variant="filled"
-						label="Email"
-						error={validateEmail()}
-					/>
-					<PasswordInput
-						value={password}
-						onChange={(e) => setPassword(e.currentTarget.value)}
-						placeholder="Password"
-						withAsterisk
-						variant="filled"
-						label="Password"
-						error={validatePassword()}
-					/>
-				</Flex>
+				<form>
+					<Flex
+						direction="column"
+						gap="md"
+					>
+						<TextInput
+							value={name}
+							onChange={(e) => setName(e.currentTarget.value)}
+							placeholder="John Doe"
+							withAsterisk
+							variant="filled"
+							label="Full Name"
+						/>
+						<TextInput
+							value={email}
+							onChange={(e) => setEmail(e.currentTarget.value)}
+							placeholder="Email"
+							withAsterisk
+							variant="filled"
+							label="Email"
+							error={validateEmail()}
+						/>
+						<PasswordInput
+							value={password}
+							onChange={(e) => setPassword(e.currentTarget.value)}
+							placeholder="Password"
+							withAsterisk
+							variant="filled"
+							label="Password"
+							error={validatePassword()}
+						/>
+					</Flex>
+				</form>
 
 				<Flex
 					justify="center"
@@ -140,7 +143,7 @@ export default function RegisterModal() {
 					<Button
 						variant="outline"
 						color="green"
-						onClick={() => handleRegister()}
+						onClick={(e: any) => handleRegister(e)}
 						loading={loading}
 					>
 						Register

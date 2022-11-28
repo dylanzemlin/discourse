@@ -1,15 +1,11 @@
 import { GenericAPI, API, APIResponse } from ".";
 
 export class V1 extends GenericAPI implements API {
-	async REGISTER_USER(name: string, email: string, password: string): Promise<APIResponse<boolean>> {
-		return await this.post("v1", "users/register", {
-			name, email, password
-		});
+	async REGISTER_USER(name: string, email: string, password: string): Promise<APIResponse<any>> {
+		return await this.post("oauth", `email?email=${email}&name=${name}&password=${password}`);
 	}
-	async LOGIN_USER(email: string, password: string, remember: boolean): Promise<APIResponse<boolean>> {
-		return await this.post("v1", "users/login", {
-			email, password, remember
-		});
+	async LOGIN_USER(email: string, password: string): Promise<APIResponse<any>> {
+		return await this.get("oauth", `email?email=${email}&password=${password}`);
 	}
 }
 

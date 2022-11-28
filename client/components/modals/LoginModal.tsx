@@ -29,14 +29,14 @@ export default function LoginModal() {
 	const handleLogin = async () => {
 		setLoading(true);
 
-		const result = await v1.LOGIN_USER(email, password, remember);
+		const result = await v1.LOGIN_USER(email, password);
 
 		setLoading(false);
 
 		if (result.status != HttpStatusCode.CREATED || result.error) {
 			showNotification({
 				title: `[${result.status}] Login Failed`,
-				message: result.friendlyError,
+				message: result.data?.error_text || "Unknown Error",
 				color: "red"
 			});
 			console.error(result.error);
