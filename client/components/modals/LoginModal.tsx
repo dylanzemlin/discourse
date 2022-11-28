@@ -6,6 +6,13 @@ import { useRouter } from "next/router";
 import v1 from "../../lib/api/v1";
 import { useState } from "react";
 
+const github_params = new URLSearchParams({
+	client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID as string,
+	redirect_uri: process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI as string,
+	scope: "user:email"
+});
+const github_uri = `https://github.com/login/oauth/authorize?${github_params.toString()}`;
+
 export default function LoginModal() {
 	// Router Usage
 	const router = useRouter();
@@ -102,7 +109,7 @@ export default function LoginModal() {
 					</Button>
 				</Flex>
 
-				<Divider m="lg" />
+				<Divider mt="xl" mb="xl" />
 
 				<Flex
 					justify="center"
@@ -111,7 +118,7 @@ export default function LoginModal() {
 					mt="xl"
 				>
 					<Anchor href="/google">Google</Anchor>
-					<Anchor href="/google">Github</Anchor>
+					<Anchor href={github_uri}>Github</Anchor>
 				</Flex>
 			</Modal>
 

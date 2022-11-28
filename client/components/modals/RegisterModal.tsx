@@ -1,10 +1,17 @@
-import { Button, Flex, Modal, PasswordInput, TextInput, Title } from "@mantine/core";
+import { Anchor, Button, Divider, Flex, Modal, PasswordInput, TextInput, Title } from "@mantine/core";
 import HttpStatusCode from "../../lib/api/HttpStatusCode";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import v1 from "../../lib/api/v1";
 import { useState } from "react";
 import { showNotification } from "@mantine/notifications";
+
+const github_params = new URLSearchParams({
+	client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID as string,
+	redirect_uri: process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI as string,
+	scope: "user:email"
+});
+const github_uri = `https://github.com/login/oauth/authorize?${github_params.toString()}`;
 
 export default function RegisterModal() {
 	// Router Usage
@@ -138,6 +145,18 @@ export default function RegisterModal() {
 					>
 						Register
 					</Button>
+				</Flex>
+
+				<Divider mt="xl" mb="xl" />
+
+				<Flex
+					justify="center"
+					w="100%"
+					gap="md"
+					mt="xl"
+				>
+					<Anchor href="/google">Google</Anchor>
+					<Anchor href={github_uri}>Github</Anchor>
 				</Flex>
 			</Modal>
 
