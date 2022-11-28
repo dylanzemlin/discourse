@@ -33,7 +33,7 @@ export default function LoginModal() {
 
 		setLoading(false);
 
-		if (result.status != HttpStatusCode.CREATED || result.error) {
+		if (result.status != HttpStatusCode.OK || result.error) {
 			showNotification({
 				title: `[${result.status}] Login Failed`,
 				message: result.data?.error_text || "Unknown Error",

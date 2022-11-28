@@ -19,8 +19,8 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 			});
 		}
 
-		const hashedPassword = await hashPassword(password as string, user.salt);
-		if (hashedPassword != user.password) {
+		const hashedPassword = await hashPassword(password as string, user.auth_email_salt);
+		if (hashedPassword !== user.auth_email_hash) {
 			return res.status(HttpStatusCode.BAD_REQUEST).json({
 				error_code: DiscourseErrorCode.AUTH_BAD_CREDENTIALS,
 				error_text: "AUTH_BAD_CREDENTIALS"
@@ -34,9 +34,9 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 			username: user.username
 		}
 		await req.session.save();
-
-		// TODO: Determine if the state has a redirectTo value and redirect to that
-		return res.redirect(req.query.returnTo as string ?? "/chaos");
+		return res.status(HttpStatusCode.OK).json({
+			success: true
+		});
 	} catch (_) {
 		return res.status(HttpStatusCode.BAD_REQUEST).json({
 			error_code: DiscourseErrorCode.AUTH_BAD_CREDENTIALS,
@@ -65,13 +65,10 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 		});
 	} catch {
 		// No user exists, we create it
-		console.log("generating salt");
 		const salt = await generateSalt();
-		console.log("hashing password");
 		const hash = await hashPassword(password as string, salt);
-		console.log("creating user");
 		const user = await pb.collection("users").create({
-			username,
+			username: username ?? (name as string).toLowerCase().replace(" ", "_"),
 			name,
 			email,
 			auth_type: "password",
@@ -79,7 +76,6 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 			auth_email_salt: salt
 		});
 
-		console.log("creating session");
 		req.session.user = {
 			id: user.id,
 			email: user.email,
@@ -87,10 +83,8 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 			username: user.username
 		}
 
-		console.log("saving session");
 		await req.session.save();
 
-		console.log("redirecting");
 		return res.status(HttpStatusCode.CREATED).json({
 			success: true
 		})
@@ -98,7 +92,6 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
-	console.log(req.method);
 	if (req.method === "GET") {
 		return login(req, res);
 	}

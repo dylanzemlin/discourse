@@ -1,13 +1,22 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
+import HttpStatusCode from "../api/HttpStatusCode";
 
 export type AuthState = {
 	authed: boolean;
-	verifyAuth: () => void;
+	user: {
+		id: string;
+		name: string;
+		email: string;
+	} | undefined,
+	verifyAuth: () => Promise<void>;
+	loading: boolean;
 }
 
 const defaultState: AuthState = {
 	authed: false,
-	verifyAuth: () => { },
+	user: undefined,
+	verifyAuth: async () => { },
+	loading: true
 };
 
 const AppContext = createContext<AuthState>(defaultState);
@@ -17,23 +26,45 @@ export const useAuthentication = () => {
 
 export function AuthenticationProvider({ children }: any) {
 	const [authed, setAuthed] = useState(false);
+	const [loading, setLoading] = useState(true);
+	const [id, setUid] = useState<string | undefined>();
+	const [name, setName] = useState<string | undefined>();
+	const [email, setEmail] = useState<string | undefined>();
 
 	const verifyAuth = async () => {
 		try {
-			const result = await fetch("/api/authenticate");
-			if (result == null || result.status != 200) {
+			const result = await fetch("/api/auth");
+			if (result == null || result.status !== HttpStatusCode.OK) {
 				throw new Error("Failed Authentication");
 			}
 
+			const data = await result.json();
+			setUid(data.id);
+			setName(data.name);
+			setEmail(data.email);
 			setAuthed(true);
 		} catch {
 			setAuthed(false);
 		}
 	}
 
+	useEffect(() => {
+		verifyAuth().then(() => {
+			setLoading(false);
+		}).catch(() => {
+			setLoading(false);
+		});
+	}, []);
+
 	const value: AuthState = {
-		authed: authed,
-		verifyAuth
+		authed,
+		user: {
+			id: id as string,
+			name: name as string,
+			email: email as string
+		},
+		verifyAuth,
+		loading
 	}
 
 	return (

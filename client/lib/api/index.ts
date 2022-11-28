@@ -42,7 +42,7 @@ export class GenericAPI {
 
 		try {
 			return {
-				status: 200,
+				status: result.status,
 				data: await result.json()
 			}
 		} catch {

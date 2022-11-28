@@ -1,10 +1,10 @@
 import { Anchor, Button, Divider, Flex, Modal, PasswordInput, TextInput, Title } from "@mantine/core";
 import HttpStatusCode from "../../lib/api/HttpStatusCode";
+import { showNotification } from "@mantine/notifications";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import v1 from "../../lib/api/v1";
 import { useState } from "react";
-import { showNotification } from "@mantine/notifications";
 
 const github_params = new URLSearchParams({
 	client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID as string,
@@ -76,10 +76,10 @@ export default function RegisterModal() {
 
 		setLoading(false);
 
-		if (result.status != HttpStatusCode.CREATED || result.error) {
+		if (result.status !== HttpStatusCode.CREATED || result.error) {
 			showNotification({
 				title: `[${result.status}] Registration Failed`,
-				message: result.friendlyError,
+				message: result.error,
 				color: "red"
 			});
 			console.error(result.error);

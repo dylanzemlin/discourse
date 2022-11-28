@@ -50,8 +50,6 @@ export default function useWRTC(opts: WRTCOptions) {
   const streams = useDict<string, MediaStream>();
 
   const handleJoin = (uid: string, initiator: boolean) => {
-    console.log(`handleJoin - ${uid} | ${initiator}`);
-
     if (localStream == null) {
       console.error("localStream is null!");
       return;
