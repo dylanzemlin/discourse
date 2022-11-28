@@ -39,7 +39,7 @@ export type WRTCOptions = {
 }
 
 export default function useWRTC(opts: WRTCOptions) {
-  const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NODE_ENV === "development" ? "ws://10.205.204.144:3001/" : "wss://dcws.dylanzeml.in/", {});
+  const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {});
   const [id] = useLocalStorage({
     key: "uuid",
     defaultValue: v4()
