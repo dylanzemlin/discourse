@@ -8,11 +8,30 @@ const iceServers: RTCIceServer[] = [
   }
 ]
 
+const constraints = {
+  audio: false,
+  video: {
+    width: {
+      min: 640,
+      ideal: 1280,
+      max: 1280,
+    },
+    height: {
+      min: 480,
+      ideal: 720,
+      max: 1080,
+    },
+    aspectRatio: 1.777777778,
+    frameRate: { max: 30 },
+    facingMode: {
+      ideal: "user",
+    },
+  },
+};
+
 export type WRTCOptions = {
   remoteUri?: string;
   localVideoRefId: string;
-  // onUserConnect: (userId: string, stream: MediaStream) => void;
-  // onUserDisconnect: (userId: string) => void;
 }
 
 export default function useWRTC(opts: WRTCOptions) {
@@ -50,10 +69,11 @@ export default function useWRTC(opts: WRTCOptions) {
     }
 
     (async () => {
-      setLocalStream(await navigator.mediaDevices.getUserMedia({ video: true, audio: true }));
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setLocalStream(stream);
 
-      localStream?.getTracks().forEach(track => {
-        connection.addTrack(track, localStream);
+      stream?.getTracks().forEach(track => {
+        connection.addTrack(track, stream);
       });
 
       const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
@@ -61,9 +81,8 @@ export default function useWRTC(opts: WRTCOptions) {
         console.error(`Invalid local source object :(`);
         return;
       }
-
-      console.log("setting source object :)")
-      element.srcObject = localStream;
+      
+      element.srcObject = stream;
     })();
   }, [connection, localStream, opts.localVideoRefId]);
 
@@ -78,6 +97,7 @@ export default function useWRTC(opts: WRTCOptions) {
   return {
     isConnected,
     setMuted,
-    setVideoEnabled
+    setVideoEnabled,
+    remoteStreams
   }
 }
