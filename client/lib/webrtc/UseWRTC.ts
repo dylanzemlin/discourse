@@ -1,9 +1,7 @@
 import useWebSocket, { ReadyState } from "react-use-websocket";
-import { useLocalStorage } from "@mantine/hooks";
 import { useCallback, useEffect, useState } from "react";
 import useDict from "../useDict";
 import Peer from "simple-peer";
-import { v4 } from "uuid";
 
 const iceConfig: RTCConfiguration = {
   iceServers: [
@@ -41,7 +39,6 @@ export type WRTCOptions = {
 
 export default function useWRTC(opts: WRTCOptions) {
   const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {});
-  const [id] = useLocalStorage({ key: "uuid", defaultValue: v4() });
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
@@ -145,9 +142,11 @@ export default function useWRTC(opts: WRTCOptions) {
     }
 
     (async () => {
+      console.log("test 3");
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setLocalStream(stream);
 
+      console.log("test 2");
       const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
       if (element == null) {
         console.error(`Invalid local source object :(`);
@@ -156,6 +155,7 @@ export default function useWRTC(opts: WRTCOptions) {
 
       element.srcObject = stream;
 
+      console.log("test");
       send(PackageType.INIT, {});
     })();
   }, [isConnected, opts.localVideoRefId, send]);

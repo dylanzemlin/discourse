@@ -23,6 +23,7 @@ const sessionOptions = {
 	// secure: true should be used in production (HTTPS) but can't be used in development (HTTP)
 	cookieOptions: {
 		secure: process.env.NODE_ENV === "production",
+		domain: process.env.NODE_ENV === "production" ? "dylanzeml.in" : undefined,
 	},
 };
 
