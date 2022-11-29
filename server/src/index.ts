@@ -72,6 +72,7 @@ wss.on("connection", async (localSocket, req) => {
 		type: PackageType.INIT,
 		chatHistory
 	}));
+	clients[localSocket.id] = localSocket;
 
 	// Generate a unique id for each connection!
 	localSocket.on("message", (data) => {
