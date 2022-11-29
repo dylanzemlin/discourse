@@ -1,11 +1,11 @@
+import { Button, Flex, Grid, Group, LoadingOverlay, Title } from "@mantine/core";
 import MediaDeviceQuery from "../components/queries/MediaDeviceQuery";
-import VerticalDivider from "../components/global/VerticalDivider";
-import { Button, Flex, Grid, Group, LoadingOverlay } from "@mantine/core";
+import { Headphones, Microphone, Camera } from "tabler-icons-react";
+import { useAuthentication } from "../lib/context/auth";
 import useWRTC from "../lib/webrtc/UseWRTC";
 import { useEffect, useRef } from "react";
 import Head from "next/head";
-import { useAuthentication } from "../lib/context/auth";
-import { Headphones, Microphone, Camera } from "tabler-icons-react";
+import Image from "next/image";
 
 type VideoProps = {
 	stream: MediaStream;
@@ -83,8 +83,10 @@ export default function Home() {
 			<Head>
 				<title>Discourse - Chaos</title>
 			</Head>
-			<Flex>
-				<Grid grow m={"lg"}>
+			<Flex w="100%" h="100vh" direction="column">
+				<Grid grow m={"lg"} style={{
+					flexGrow: 1
+				}}>
 					<Grid.Col span={3}>
 						<video style={{
 							zIndex: -50,
@@ -100,17 +102,24 @@ export default function Home() {
 						)
 					})}
 				</Grid>
-				<Flex style={{
+				<Flex p="sm" style={{
 					marginTop: "auto",
 					width: "100%",
-					height: "3rem"
+					alignItems: "center",
 				}}>
-					<h2>
+					<img src="/api/avatar" alt={`${auth.user?.name}'s Avatar`} width={64} height={64} style={{
+						borderRadius: "50%",
+						marginRight: "1rem"
+					}} />
+					<Title mr="1rem" order={2}>
 						{ auth.user?.name }
-					</h2>
-					<VerticalDivider />
-					{/* Mute/Deafen/Video Buttons */}
-					<Group>
+					</Title>
+					<div style={{
+						width: "3rem",
+						height: "3px",
+						backgroundColor: "#fff"
+					}} />
+					<Group ml="lg">
 						<Button onClick={wrtc.toggleMuted}>
 							<Microphone color={wrtc.muted ? "red" : undefined} />
 						</Button>
