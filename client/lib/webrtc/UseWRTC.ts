@@ -35,6 +35,7 @@ const constraints = {
   video: {
     // width: 640,
     // height: 480,
+    aspectRatio: 4 / 3, // 4:3
     frameRate: { max: 30 },
     facingMode: {
       ideal: "user",
