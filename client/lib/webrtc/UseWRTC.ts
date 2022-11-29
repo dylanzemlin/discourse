@@ -173,7 +173,7 @@ export default function useWRTC(opts: WRTCOptions) {
 
   // Triggered on every connection state change
   useEffect(() => {
-    if(readyState === ReadyState.CLOSED) {
+    if (readyState === ReadyState.CLOSED) {
       reset();
       setIsConnected(false);
     }
@@ -194,6 +194,11 @@ export default function useWRTC(opts: WRTCOptions) {
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setLocalStream(stream);
 
+      // Start muted
+      for (const track of stream.getAudioTracks()) {
+        track.enabled = false;
+      }
+
       const timer = setInterval(() => {
         // Wait for the element to be rendered
         const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
@@ -213,9 +218,9 @@ export default function useWRTC(opts: WRTCOptions) {
       return;
     }
 
-    localStream.getAudioTracks().forEach(track => {
-      track.enabled = !muted;
-    });
+    for (const track of localStream.getAudioTracks()) {
+      track.enabled = !track.enabled;
+    }
     setMuted(!muted);
   }
 
@@ -224,9 +229,9 @@ export default function useWRTC(opts: WRTCOptions) {
       return;
     }
 
-    localStream.getVideoTracks().forEach(track => {
-      track.enabled = videoEnabled;
-    });
+    for (const track of localStream.getVideoTracks()) {
+      track.enabled = !videoEnabled;
+    }
     setVideoEnabled(!videoEnabled);
   }
 
@@ -236,11 +241,9 @@ export default function useWRTC(opts: WRTCOptions) {
     }
 
     // mute all remote tracks
-    streams.values().forEach((stream) => {
-      stream.getAudioTracks().forEach(track => {
-        track.enabled = !deafened;
-      });
-    });
+    for (const stream of streams.values()) {
+      stream.getAudioTracks().forEach(track => track.enabled = !deafened);
+    }
     setDeafened(!deafened);
   }
 

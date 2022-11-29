@@ -48,7 +48,7 @@ export default function MediaDeviceQuery(props: MediaDeviceQueryProps) {
 		case QueryState.BLOCKED:
 			return <Flex w="100" h="100vh" align="center" justify="center" direction="column">
 				<Title>Media Device Error</Title>
-				<p>It looks like you have blocked access to your camera and/or microphone. Please allow access to your camera and microphone in your browser settings.</p>
+				<p>It looks like you have blocked access to your camera and/or microphone. Please allow access to your camera and microphone in your browser settings and ensure no other application is using your camera!</p>
 			</Flex>
 		
 		case QueryState.OKAY:
