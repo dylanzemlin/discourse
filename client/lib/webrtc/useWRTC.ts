@@ -2,6 +2,7 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useCallback, useEffect, useState } from "react";
 import useDict from "../useDict";
 import Peer from "simple-peer";
+import { useAuthentication } from "../context/auth";
 
 const iceConfig: RTCConfiguration = {
   iceServers: [
@@ -73,17 +74,14 @@ export enum PackageType {
   STATE_CHANGE,
 }
 
-export type WRTCOptions = {
-  localVideoRefId: string;
-}
-
 type PeerState = {
   muted: boolean;
   video: boolean;
   deafened: boolean;
+  name: string;
 }
 
-export default function useWRTC(opts: WRTCOptions) {
+export default function useWRTC() {
   // Websocket Stream/Connection
   const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {});
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
@@ -93,12 +91,15 @@ export default function useWRTC(opts: WRTCOptions) {
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [deafened, setDeafened] = useState(false);
   const [muted, setMuted] = useState(true);
-  const [localState, setLocalState] = useState<PeerState>({ muted, video: videoEnabled, deafened });
+  const [localState, setLocalState] = useState<PeerState>({ muted, video: videoEnabled, deafened, name: "John Doe" });
 
   // Peer Data
   const peers = useDict<string, Peer.Instance>();
   const peerStates = useDict<string, PeerState>();
   const streams = useDict<string, MediaStream>();
+
+  // Auth Data
+  const auth = useAuthentication();
 
   const send = useCallback((type: PackageType, data: any) => {
     const str = JSON.stringify({
@@ -142,7 +143,8 @@ export default function useWRTC(opts: WRTCOptions) {
     peerStates.set(uid, {
       muted: true,
       video: true,
-      deafened: false
+      deafened: false,
+      name: "John Doe"
     });
 
     peer.on("signal", (signal) => {
@@ -247,27 +249,17 @@ export default function useWRTC(opts: WRTCOptions) {
         track.enabled = false;
       }
 
-      const timer = setInterval(() => {
-        // Wait for the element to be rendered
-        const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
-        if (element == null) {
-          return;
-        }
-
-        element.srcObject = stream;
-        send(PackageType.INIT, {});
-        clearInterval(timer);
-      }, 100);
+      send(PackageType.INIT, {});
     })();
-  }, [isConnected, opts.localVideoRefId, send]);
+  }, [isConnected, send]);
 
   useEffect(() => {
     send(PackageType.STATE_CHANGE, { state: localState });
   }, [localState, send]);
 
   useEffect(() => {
-    setLocalState({ muted, video: videoEnabled, deafened });
-  }, [muted, videoEnabled, deafened]);
+    setLocalState({ muted, video: videoEnabled, deafened, name: auth.user?.name ?? "John Doe" });
+  }, [muted, videoEnabled, deafened, auth.user?.name]);
 
   const toggleMuted = () => {
     if (localStream == null) {
@@ -308,11 +300,11 @@ export default function useWRTC(opts: WRTCOptions) {
   return {
     isConnected,
     toggleMuted,
-    muted,
     toggleDeafened,
-    deafened,
     toggleVideo,
-    videoEnabled,
-    streams
+    localState,
+    peerStates,
+    streams,
+    localStream
   }
 }

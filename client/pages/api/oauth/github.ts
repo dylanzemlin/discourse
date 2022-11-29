@@ -1,4 +1,5 @@
 import { DiscourseErrorCode } from "../../../lib/api/DiscourseErrorCode";
+import { DiscouseUserFlags } from "../../../lib/api/DiscourseUserFlags";
 import HttpStatusCode from "../../../lib/api/HttpStatusCode";
 import { NextApiRequest, NextApiResponse } from "next";
 import { withSessionRoute } from "../../../lib/iron";
@@ -67,7 +68,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		});
 	}
 
-	const { login, email, name } = await userResponse.json();
+	const { login, email, name, avatar_url } = await userResponse.json();
 	let user;
 	try {
 		user = await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);
@@ -78,29 +79,25 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 			});
 		}
 	} catch (e) {
-		try {
-			user = await pb.collection("users").create({
-				email,
+		user = await pb.collection("users").create({
+			email,
+			username: login,
+			auth_type: "github",
+			flags: DiscouseUserFlags.None,
+			settings: {
 				name: name ?? login,
-				username: login,
-				auth_type: "github",
-				admin: false
-			});
-		} catch (e) {
-			console.error(`[/api/oauth/github] Failed to create user: ${e}`);
-			return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-				error_code: DiscourseErrorCode.INTERNAL_SERVER_ERROR,
-				error_text: "INTERNAL_SERVER_ERROR"
-			});
-		}
+				avatar: avatar_url,
+				theme: "dark"
+			}
+		});
 	}
 
 	req.session.user = {
 		id: user.id,
 		email: user.email,
-		name: user.name,
+		name: user.settings.name,
 		username: user.username,
-		admin: user.admin
+		flags: user.flags
 	}
 	await req.session.save();
 

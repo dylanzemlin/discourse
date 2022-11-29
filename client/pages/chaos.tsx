@@ -4,39 +4,71 @@ import { Headphones, Microphone, Camera } from "tabler-icons-react";
 import { useAuthentication } from "../lib/context/auth";
 import useWRTC from "../lib/webrtc/useWRTC";
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import Head from "next/head";
+import { useDisclosure } from "@mantine/hooks";
+import UserSettingsModal from "../components/modals/UserSettingsModal";
 
 type VideoProps = {
-	stream: MediaStream;
-	id: string;
+	stream: MediaStream | null;
+	state: any;
+	uid: string;
 }
 
 function Video(props: VideoProps) {
 	const ref = useRef<HTMLVideoElement>(null);
 
 	useEffect(() => {
-		if (ref.current) {
+		if (ref.current && props.stream) {
 			ref.current.srcObject = props.stream;
 		}
 	}, [props.stream, ref]);
 
 	return (
-		<video style={{
-			maxHeight: "100%",
-			maxWidth: "100%",
-		}} ref={ref} id={props.id} autoPlay />
+		<div style={{
+			position: "relative",
+			height: "min-content",
+			width: "min-content",
+		}}>
+			<div style={{
+				position: "absolute",
+				float: "left",
+				padding: "1rem",
+				display: "flex",
+				height: "100%",
+				width: "100%",
+			}}>
+				{props.state?.video ? (
+					<>
+						{props.state?.muted && <Microphone color={"red"} />}
+						{props.state?.deafened && <Headphones color={"red"} />}
+					</>
+				) : (
+					<Flex w="100%" h="100%" align="center" justify="center" gap="2rem">
+						<Image unoptimized src={`/api/avatar?id=${props.uid}`} alt={`${props.uid}'s Avatar`} width={128} height={128} style={{
+							borderRadius: "50%",
+						}} />
+						<Title order={2}>John Doe</Title>
+					</Flex>
+				)}
+			</div>
+			<video style={{
+				width: "640px",
+				height: "480px",
+				// width: "320px",
+				// height: "240px",
+			}} ref={ref} autoPlay />
+		</div>
 	)
 }
 
-export default function Home() {
+export default function Chaos() {
 	// Handle all the WebRTC stuff
-	const videoRef = useRef<HTMLVideoElement>(null);
 	const auth = useAuthentication();
-	const wrtc = useWRTC({
-		localVideoRefId: "localVideo"
-	});
+	const wrtc = useWRTC();
+	const [showSettings, settingsHandler] = useDisclosure(false);
 
-	if (!wrtc.isConnected) {
+	if (!wrtc.isConnected || auth.user == null) {
 		return (
 			<LoadingOverlay visible={true} />
 		)
@@ -60,31 +92,34 @@ export default function Home() {
 					width: "100%",
 					height: "100%"
 				}}>
-					<video style={{
-						maxHeight: "100%",
-						maxWidth: "100%",
-					}} autoPlay muted id="localVideo" ref={videoRef}>
-					</video>
-					{wrtc.streams.keys().map((id) => {
+					<Video uid={auth.user.id} state={wrtc.localState} stream={wrtc.localStream} />
+					{wrtc.streams.keys().map((uid) => {
 						return (
-							<div key={id}>
-								<Video id={`video:${id}`} stream={wrtc.streams.get(id)} />
-							</div>
+							<Video uid={uid} stream={wrtc.streams.get(uid)} state={wrtc.peerStates.get(uid)} key={uid} />
 						)
 					})}
 				</div>
-				<Flex p="1rem" style={{
+				<Flex p="0.5rem" style={{
 					marginTop: "auto",
 					width: "100%",
 					alignItems: "center",
 				}}>
-					<img src="/api/avatar" alt={`${auth.user?.name}'s Avatar`} width={64} height={64} style={{
-						borderRadius: "50%",
-						marginRight: "1rem"
-					}} />
-					<Title mr="1rem" order={2}>
-						{auth.user?.name}
-					</Title>
+					<Group style={{
+						borderRadius: "5px",
+						padding: "0.5rem"
+					}} mr="1rem" sx={{
+						"&:hover": {
+							backgroundColor: "rgba(0, 0, 0, 0.3)",
+							cursor: "pointer"
+						}
+					}} onClick={settingsHandler.open}>
+						<Image unoptimized src="/api/avatar" alt={`${auth.user?.name}'s Avatar`} width={64} height={64} style={{
+							borderRadius: "50%"
+						}} />
+						<Title order={2}>
+							{auth.user?.name}
+						</Title>
+					</Group>
 					<div style={{
 						width: "3rem",
 						height: "3px",
@@ -92,17 +127,18 @@ export default function Home() {
 					}} />
 					<Group ml="lg">
 						<Button onClick={wrtc.toggleMuted}>
-							<Microphone color={wrtc.muted ? "red" : undefined} />
+							<Microphone color={wrtc.localState?.muted ? "red" : undefined} />
 						</Button>
 						<Button onClick={wrtc.toggleDeafened}>
-							<Headphones color={wrtc.deafened ? "red" : undefined} />
+							<Headphones color={wrtc.localState?.deafened ? "red" : undefined} />
 						</Button>
 						<Button onClick={wrtc.toggleVideo}>
-							<Camera color={!wrtc.videoEnabled ? "red" : undefined} />
+							<Camera color={!wrtc.localState?.video ? "red" : undefined} />
 						</Button>
 					</Group>
 				</Flex>
 			</Flex>
+			<UserSettingsModal opened={showSettings} onClose={settingsHandler.close} />
 		</MediaDeviceQuery>
 	)
 }

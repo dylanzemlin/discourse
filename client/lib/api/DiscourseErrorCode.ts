@@ -1,8 +1,6 @@
 export enum DiscourseErrorCode {
 	// Global Errors
 	SERVER_BAD_ENVIRONMENT,
-	INTERNAL_SERVER_ERROR,
-	BAD_METHOD,
 
 	// Email/Password Login Errors
 	AUTH_USE_SERVICE,

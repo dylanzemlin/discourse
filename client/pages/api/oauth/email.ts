@@ -1,4 +1,5 @@
 import { DiscourseErrorCode } from "../../../lib/api/DiscourseErrorCode";
+import { DiscouseUserFlags } from "../../../lib/api/DiscourseUserFlags";
 import { generateSalt, hashPassword } from "../../../lib/crypto";
 import HttpStatusCode from "../../../lib/api/HttpStatusCode";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -30,9 +31,9 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 		req.session.user = {
 			id: user.id,
 			email: user.email,
-			name: user.name,
+			name: user.settings.name,
 			username: user.username,
-			admin: user.admin
+			flags: user.flags
 		}
 		await req.session.save();
 		return res.status(HttpStatusCode.OK).json({
@@ -68,22 +69,26 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 		// No user exists, we create it
 		const salt = await generateSalt();
 		const hash = await hashPassword(password as string, salt);
-		const user = await pb.collection("users").create({
-			username: username ?? (name as string).toLowerCase().replace(" ", "_"),
-			name,
+		const user = await pb.collection("users").create<any>({
 			email,
+			username: username ?? (name as string).toLowerCase().replace(" ", "_"),
 			auth_type: "password",
 			auth_email_hash: hash,
 			auth_email_salt: salt,
-			admin: false
+			flags: DiscouseUserFlags.None,
+			settings: {
+				name: name ?? username,
+				avatar: null,
+				theme: "dark"
+			}
 		});
 
 		req.session.user = {
 			id: user.id,
 			email: user.email,
-			name: user.name,
+			name: user.settings.name,
 			username: user.username,
-			admin: user.admin
+			flags: user.flags
 		}
 
 		await req.session.save();
@@ -104,7 +109,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 	}
 
 	return res.status(HttpStatusCode.METHOD_NOT_ALLOWED).json({
-		error_code: DiscourseErrorCode.BAD_METHOD,
-		error_text: "BAD_METHOD"
+		error_code: HttpStatusCode.METHOD_NOT_ALLOWED,
+		error_text: "METHOD_NOT_ALLOWED"
 	});
 })

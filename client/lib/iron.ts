@@ -1,21 +1,18 @@
+import { GetServerSidePropsContext, GetServerSidePropsResult, NextApiHandler } from "next";
+import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
+import { DiscouseUserFlags } from "./api/DiscourseUserFlags";
+
 declare module "iron-session" {
-  interface IronSessionData {
-    user?: {
-      id: string;
+	interface IronSessionData {
+		user?: {
+			id: string;
 			name: string;
 			email: string;
 			username: string;
-			admin: boolean;
-    };
-  }
+			flags: DiscouseUserFlags;
+		};
+	}
 }
-
-import { withIronSessionApiRoute, withIronSessionSsr } from "iron-session/next";
-import {
-	GetServerSidePropsContext,
-	GetServerSidePropsResult,
-	NextApiHandler,
-} from "next";
 
 const sessionOptions = {
 	password: process.env.IRON_PASSWORD as string,
