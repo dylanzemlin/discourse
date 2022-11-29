@@ -48,15 +48,18 @@ export default function useWRTC(opts: WRTCOptions) {
   const streams = useDict<string, MediaStream>();
 
   const send = useCallback((type: PackageType, data: any) => {
-    sendMessage(JSON.stringify({
+    const str = JSON.stringify({
       type,
       ...data
-    }));
+    });
+    console.log("[send] sending: " + str);
+    sendMessage(str);
   }, [sendMessage]);
 
   const handleJoin = (uid: string, initiator: boolean) => {
+    console.log("handleJoin 1");
     if (localStream == null) {
-      console.error("localStream is null!");
+      console.error("[handleJoin] localStream is null!");
       return;
     }
 
@@ -69,6 +72,7 @@ export default function useWRTC(opts: WRTCOptions) {
     peers.set(uid, peer);
 
     peer.on("signal", (signal) => {
+      console.log("[handleJoin] signal from peer: " + uid);
       send(PackageType.SIGNAL, {
         uid,
         signal
@@ -77,6 +81,7 @@ export default function useWRTC(opts: WRTCOptions) {
 
     peer.on("stream", (stream) => {
       streams.set(uid, stream);
+      console.log("[handleJoin] stream from peer: " + uid);
 
       if (deafened) {
         stream.getAudioTracks().forEach(track => track.enabled = false);
@@ -99,10 +104,12 @@ export default function useWRTC(opts: WRTCOptions) {
             return;
           }
 
+          console.log("[messageHandler] stream from peer: " + packet.uid);
           peer.signal(packet.signal);
         } break;
 
         case PackageType.CLIENT_DISCONNECTED: {
+          console.log("[messageHandler] client disconnected: " + packet.uid);
           peers.get(packet.uid)?.destroy();
           streams.get(packet.uid)?.getTracks().forEach((track) => track.stop());
 
@@ -111,6 +118,7 @@ export default function useWRTC(opts: WRTCOptions) {
         } break;
 
         case PackageType.CLIENT_JOINED: {
+          console.log("[messageHandler] client joined: " + packet.uid);
           handleJoin(packet.uid, false);
           send(PackageType.CLIENT_JOINED_ACK, {
             uid: packet.uid
@@ -118,6 +126,7 @@ export default function useWRTC(opts: WRTCOptions) {
         } break;
 
         case PackageType.CLIENT_JOINED_ACK: {
+          console.log("[messageHandler] client joined ack: " + packet.uid);
           handleJoin(packet.uid, true);
         }
 
