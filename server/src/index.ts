@@ -3,7 +3,6 @@ import Filter from "bad-words";
 import ws from "ws";
 
 import dotenv from "dotenv";
-import { PackageType } from "../../global/enums";
 dotenv.config();
 
 const filter = new Filter();
@@ -13,6 +12,23 @@ let chatHistory: {
 }[] = [];
 let lastChat = Date.now();
 let lastChats: Record<string, number> = {};
+
+export enum PackageType {
+  // [Server] Used to request a ping from a client
+  // [Client] Used to respond to a ping from the server
+  PING,
+
+  // [Server] Used to broadcast a new chat message to all clients
+  // [Client] Used to send a new chat message to the server
+  SEND_CHAT,
+
+  
+  INIT,
+  SIGNAL,
+  CLIENT_JOINED,
+  CLIENT_JOINED_ACK,
+  CLIENT_DISCONNECTED
+}
 
 declare module "ws" {
 	export interface WebSocket extends ws {
