@@ -50,7 +50,7 @@ export default function Home() {
 	// 		// set canvas width/height to match video width/height
 	// 		canvas.width = videoRef.current?.videoWidth ?? 0;
 	// 		canvas.height = videoRef.current?.videoHeight ?? 0;
-				
+
 	// 		context.translate(videoRef.current?.videoWidth ?? 0, 0);
 	// 		context.scale(-1, 1);
 	// 	});
@@ -76,10 +76,11 @@ export default function Home() {
 	}
 
 	return (
-		<MediaDeviceQuery
-			audio={true}
-			video={true}
-		>
+		// <MediaDeviceQuery
+		// 	audio={true}
+		// 	video={true}
+		// >
+		<>
 			<Head>
 				<title>Discourse - Chaos</title>
 			</Head>
@@ -112,7 +113,7 @@ export default function Home() {
 						marginRight: "1rem"
 					}} />
 					<Title mr="1rem" order={2}>
-						{ auth.user?.name + " - " + auth.user?.id }
+						{auth.user?.name + " - " + auth.user?.id}
 					</Title>
 					<div style={{
 						width: "3rem",
@@ -132,6 +133,7 @@ export default function Home() {
 					</Group>
 				</Flex>
 			</Flex>
-		</MediaDeviceQuery>
+		</>
+
 	)
 }
