@@ -78,13 +78,21 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 			});
 		}
 	} catch (e) {
-		user = await pb.collection("users").create({
-			email,
-			name,
-			username: login,
-			auth_type: "github",
-			admin: false
-		});
+		try {
+			user = await pb.collection("users").create({
+				email,
+				name: name ?? login,
+				username: login,
+				auth_type: "github",
+				admin: false
+			});
+		} catch (e) {
+			console.error(`[/api/oauth/github] Failed to create user: ${e}`);
+			return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+				error_code: DiscourseErrorCode.INTERNAL_SERVER_ERROR,
+				error_text: "INTERNAL_SERVER_ERROR"
+			});
+		}
 	}
 
 	req.session.user = {

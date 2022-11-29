@@ -84,16 +84,21 @@ type PeerState = {
 }
 
 export default function useWRTC(opts: WRTCOptions) {
+  // Websocket Stream/Connection
   const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {});
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+
+  // Local States
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [deafened, setDeafened] = useState(false);
   const [muted, setMuted] = useState(true);
+  const [localState, setLocalState] = useState<PeerState>({ muted, video: videoEnabled, deafened });
+
+  // Peer Data
   const peers = useDict<string, Peer.Instance>();
   const peerStates = useDict<string, PeerState>();
   const streams = useDict<string, MediaStream>();
-  const [localState, setLocalState] = useState<PeerState>({ muted, video: videoEnabled, deafened });
 
   const send = useCallback((type: PackageType, data: any) => {
     const str = JSON.stringify({

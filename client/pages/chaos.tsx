@@ -56,14 +56,13 @@ export default function Home() {
 					padding: "1em",
 					display: "flex",
 					overflowY: "auto",
+					gap: "1rem",
 					width: "100%",
 					height: "100%"
 				}}>
 					<video style={{
-						width: "fit-content",
-						height: "fit-content",
-						maxWidth: "640px",
-						maxHeight: "360px"
+						maxHeight: "100%",
+						maxWidth: "100%",
 					}} autoPlay muted id="localVideo" ref={videoRef}>
 					</video>
 					{wrtc.streams.keys().map((id) => {
