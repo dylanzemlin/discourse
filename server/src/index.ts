@@ -16,11 +16,13 @@ let lastChats: Record<string, number> = {};
 declare module "ws" {
 	export interface WebSocket extends ws {
 		id: string;
+		missedPings: number;
 	}
 }
 
 enum PackageType {
 	INIT,
+	PING,
 	SEND_CHAT,
 	SIGNAL,
 	CLIENT_JOINED,
@@ -68,16 +70,33 @@ wss.on("connection", async (localSocket, req) => {
 	}
 
 	localSocket.id = id;
+	localSocket.missedPings = 0;
 	localSocket.send(JSON.stringify({
 		type: PackageType.INIT,
 		chatHistory
 	}));
 	clients[localSocket.id] = localSocket;
 
+	const pingInterval = setInterval(() => {
+		if (localSocket.missedPings >= 2) {
+			localSocket.close();
+			return;
+		}
+
+		localSocket.missedPings++;
+		localSocket.send(JSON.stringify({
+			type: PackageType.PING
+		}));
+	}, 1000);
+
 	// Generate a unique id for each connection!
 	localSocket.on("message", (data) => {
 		const json = JSON.parse(data.toString());
 		switch (json.type) {
+			case PackageType.PING: {
+				localSocket.missedPings = 0;
+			} break;
+			
 			case PackageType.INIT: {
 				broadcast({
 					type: PackageType.CLIENT_JOINED,

@@ -45,6 +45,7 @@ const constraints = {
 
 enum PackageType {
   INIT,
+  PING,
   SEND_CHAT,
   SIGNAL,
   CLIENT_JOINED,
@@ -133,6 +134,10 @@ export default function useWRTC(opts: WRTCOptions) {
 
       const packet = JSON.parse(lastMessage.data);
       switch (packet.type) {
+        case PackageType.PING: {
+          send(PackageType.PING, {});
+        } break;
+
         case PackageType.SIGNAL: {
           const peer = peers.get(packet.uid);
           if (peer == null) {
@@ -242,7 +247,9 @@ export default function useWRTC(opts: WRTCOptions) {
 
     // mute all remote tracks
     for (const stream of streams.values()) {
-      stream.getAudioTracks().forEach(track => track.enabled = !deafened);
+      for (const track of stream.getAudioTracks()) {
+        track.enabled = !deafened;
+      }
     }
     setDeafened(!deafened);
   }
