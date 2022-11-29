@@ -33,9 +33,8 @@ const iceConfig: RTCConfiguration = {
 const constraints = {
   audio: true,
   video: {
-    width: 640,
-    height: 480,
-    aspectRatio: 1.777777778,
+    // width: 640,
+    // height: 480,
     frameRate: { max: 30 },
     facingMode: {
       ideal: "user",

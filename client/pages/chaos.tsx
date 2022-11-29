@@ -21,7 +21,10 @@ function Video(props: VideoProps) {
 	}, [props.stream, ref]);
 
 	return (
-		<video ref={ref} id={props.id} autoPlay />
+		<video style={{
+			maxHeight: "100%",
+			maxWidth: "100%",
+		}} ref={ref} id={props.id} autoPlay />
 	)
 }
 
@@ -83,25 +86,30 @@ export default function Home() {
 				<title>Discourse - Chaos</title>
 			</Head>
 			<Flex w="100%" h="100vh" direction="column">
-				<Grid grow m={"lg"} style={{
-					flexGrow: 1
+				<div style={{
+					flexGrow: 1,
+					padding: "1em",
+					display: "flex",
+					overflowY: "auto",
+					width: "100%",
+					height: "100%"
 				}}>
-					<Grid.Col span={3}>
-						<video style={{
-							zIndex: 50,
-							position: "absolute"
-						}} autoPlay muted id="localVideo" ref={videoRef}></video>
-						{/* <canvas ref={canvasRef}></canvas> */}
-					</Grid.Col>
+					<video style={{
+						width: "fit-content",
+						height: "fit-content",
+						maxWidth: "640px",
+						maxHeight: "360px"
+					}} autoPlay muted id="localVideo" ref={videoRef}>
+					</video>
 					{wrtc.streams.keys().map((id) => {
 						return (
-							<Grid.Col key={id} span={2}>
+							<div key={id}>
 								<Video id={`video:${id}`} stream={wrtc.streams.get(id)} />
-							</Grid.Col>
+							</div>
 						)
 					})}
-				</Grid>
-				<Flex p="sm" style={{
+				</div>
+				<Flex p="1rem" style={{
 					marginTop: "auto",
 					width: "100%",
 					alignItems: "center",
