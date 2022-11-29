@@ -43,7 +43,7 @@ export default function useWRTC(opts: WRTCOptions) {
   const [isConnected, setIsConnected] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(false);
   const [deafened, setDeafened] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const peers = useDict<string, Peer.Instance>();
   const streams = useDict<string, MediaStream>();
 
@@ -162,6 +162,7 @@ export default function useWRTC(opts: WRTCOptions) {
         }
 
         element.srcObject = stream;
+        setMuted(true);
         send(PackageType.INIT, {});
         clearInterval(timer);
       }, 100);
