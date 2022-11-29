@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "dev": "tsc && node dist/index.js"
+    "dev": "tsc && node dist/index.js",
+    "deploy": "yarn &&  tsc && node dist/index.js"
   },
   "dependencies": {
     "bad-words": "^3.0.4",
