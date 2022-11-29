@@ -2,9 +2,11 @@ import RegisterModal from "../components/modals/RegisterModal";
 import { Button, Flex, LoadingOverlay, Title } from "@mantine/core";
 import LoginModal from "../components/modals/LoginModal";
 import { useAuthentication } from "../lib/context/auth";
+import { useRouter } from "next/router";
 
 export default function Home() {
 	const auth = useAuthentication();
+	const router = useRouter();
 
 	const logout = () => {
 		fetch("/api/auth", {
@@ -12,6 +14,10 @@ export default function Home() {
 		}).then(() => {
 			auth.verifyAuth();
 		});
+	}
+
+	const chaos = () => {
+		router.push("/chaos");
 	}
 
 	return (
@@ -33,7 +39,7 @@ export default function Home() {
 					</>
 				) : (
 					<>
-						<Button size="lg" color="green" onClick={logout}>Chaos</Button>
+						<Button size="lg" color="green" onClick={chaos}>Chaos</Button>
 						<Button size="lg" color="red" onClick={logout}>Logout</Button>
 					</>
 				)}
