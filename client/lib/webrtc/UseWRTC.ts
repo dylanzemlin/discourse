@@ -248,7 +248,7 @@ export default function useWRTC(opts: WRTCOptions) {
     // mute all remote tracks
     for (const stream of streams.values()) {
       for (const track of stream.getAudioTracks()) {
-        track.enabled = !deafened;
+        track.enabled = deafened;
       }
     }
     setDeafened(!deafened);
