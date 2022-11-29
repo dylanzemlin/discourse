@@ -1,6 +1,6 @@
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useLocalStorage } from "@mantine/hooks";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import useDict from "../useDict";
 import Peer from "simple-peer";
 import { v4 } from "uuid";
@@ -50,12 +50,12 @@ export default function useWRTC(opts: WRTCOptions) {
   const peers = useDict<string, Peer.Instance>();
   const streams = useDict<string, MediaStream>();
 
-  const send = (type: PackageType, data: any) => {
+  const send = useCallback((type: PackageType, data: any) => {
     sendMessage(JSON.stringify({
       type,
       ...data
     }));
-  }
+  }, [sendMessage]);
 
   const handleJoin = (uid: string, initiator: boolean) => {
     if (localStream == null) {
@@ -81,7 +81,7 @@ export default function useWRTC(opts: WRTCOptions) {
     peer.on("stream", (stream) => {
       streams.set(uid, stream);
 
-      if(deafened) {
+      if (deafened) {
         stream.getAudioTracks().forEach(track => track.enabled = false);
       }
     });
@@ -96,21 +96,6 @@ export default function useWRTC(opts: WRTCOptions) {
 
       const packet = JSON.parse(lastMessage.data);
       switch (packet.type) {
-        case PackageType.INIT: {
-          const stream = await navigator.mediaDevices.getUserMedia(constraints);
-          setLocalStream(stream);
-
-          const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
-          if (element == null) {
-            console.error(`Invalid local source object :(`);
-            return;
-          }
-
-          element.srcObject = stream;
-
-          send(PackageType.INIT, {});
-        } break;
-
         case PackageType.SIGNAL: {
           const peer = peers.get(packet.uid);
           if (peer == null) {
@@ -150,8 +135,30 @@ export default function useWRTC(opts: WRTCOptions) {
       return;
     }
 
+
     setIsConnected(true);
-  }, [readyState, sendMessage]);
+  }, [readyState]);
+
+  useEffect(() => {
+    if (!isConnected) {
+      return;
+    }
+
+    (async () => {
+      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+      setLocalStream(stream);
+
+      const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
+      if (element == null) {
+        console.error(`Invalid local source object :(`);
+        return;
+      }
+
+      element.srcObject = stream;
+
+      send(PackageType.INIT, {});
+    })();
+  }, [isConnected, opts.localVideoRefId, send]);
 
   const toggleMuted = () => {
     if (localStream == null) {

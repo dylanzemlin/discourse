@@ -87,7 +87,7 @@ export default function Home() {
 				<Grid grow m={"lg"}>
 					<Grid.Col span={3}>
 						<video style={{
-							zIndex: -5,
+							zIndex: -50,
 							position: "absolute"
 						}} autoPlay muted id="localVideo" ref={videoRef}></video>
 						<canvas ref={canvasRef}></canvas>
