@@ -1,5 +1,6 @@
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useCallback, useEffect, useState } from "react";
+import { PackageType } from "../../../global/enums";
 import useDict from "../useDict";
 import Peer from "simple-peer";
 
@@ -42,16 +43,6 @@ const constraints = {
     },
   },
 };
-
-enum PackageType {
-  INIT,
-  PING,
-  SEND_CHAT,
-  SIGNAL,
-  CLIENT_JOINED,
-  CLIENT_JOINED_ACK,
-  CLIENT_DISCONNECTED
-}
 
 export type WRTCOptions = {
   localVideoRefId: string;

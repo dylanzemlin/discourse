@@ -12,5 +12,8 @@
 		"tests",
 		"lib",
 		"node_modules"
+	],
+	"include": [
+		"../global/enums.ts"
 	]
 }

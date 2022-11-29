@@ -3,6 +3,7 @@ import Filter from "bad-words";
 import ws from "ws";
 
 import dotenv from "dotenv";
+import { PackageType } from "../../global/enums";
 dotenv.config();
 
 const filter = new Filter();
@@ -18,16 +19,6 @@ declare module "ws" {
 		id: string;
 		missedPings: number;
 	}
-}
-
-enum PackageType {
-	INIT,
-	PING,
-	SEND_CHAT,
-	SIGNAL,
-	CLIENT_JOINED,
-	CLIENT_JOINED_ACK,
-	CLIENT_DISCONNECTED
 }
 
 const clients: Record<string, ws.WebSocket> = {};
