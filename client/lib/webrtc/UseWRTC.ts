@@ -191,18 +191,17 @@ export default function useWRTC(opts: WRTCOptions) {
   }
 
   const toggleDeafened = () => {
-    setDeafened(!deafened);
-
-    if (localStream == null) {
-      return;
-    }
-
-    // mute all remote tracks
-    streams.values().forEach((stream) => {
-      stream.getAudioTracks().forEach(track => {
-        track.enabled = deafened;
-      });
-    });
+    // if (localStream == null) {
+    //   return;
+    // }
+    
+    // // mute all remote tracks
+    // streams.values().forEach((stream) => {
+    //   stream.getAudioTracks().forEach(track => {
+    //     track.enabled = !deafened;
+    //   });
+    // });
+    // setDeafened(!deafened);
   }
 
   return {
