@@ -1,8 +1,8 @@
-import { Button, Flex, Grid, Group, LoadingOverlay, Title } from "@mantine/core";
+import { Button, Flex, Group, LoadingOverlay, Title } from "@mantine/core";
 import MediaDeviceQuery from "../components/queries/MediaDeviceQuery";
 import { Headphones, Microphone, Camera } from "tabler-icons-react";
 import { useAuthentication } from "../lib/context/auth";
-import useWRTC from "../lib/webrtc/UseWRTC";
+import useWRTC from "../lib/webrtc/useWRTC";
 import { useEffect, useRef } from "react";
 import Head from "next/head";
 
@@ -31,45 +31,10 @@ function Video(props: VideoProps) {
 export default function Home() {
 	// Handle all the WebRTC stuff
 	const videoRef = useRef<HTMLVideoElement>(null);
-	// const canvasRef = useRef<HTMLCanvasElement>(null);
 	const auth = useAuthentication();
 	const wrtc = useWRTC({
 		localVideoRefId: "localVideo"
 	});
-
-	// useEffect(() => {
-	// 	if (videoRef.current == null || canvasRef.current == null) {
-	// 		return;
-	// 	}
-
-	// 	videoRef.current.addEventListener("loadedmetadata", () => {
-	// 		const context = canvasRef.current?.getContext("2d");
-	// 		if (context == null || canvasRef.current == null) {
-	// 			return;
-	// 		}
-
-	// 		const canvas = canvasRef.current as HTMLCanvasElement;
-	// 		// set canvas width/height to match video width/height
-	// 		canvas.width = videoRef.current?.videoWidth ?? 0;
-	// 		canvas.height = videoRef.current?.videoHeight ?? 0;
-
-	// 		context.translate(videoRef.current?.videoWidth ?? 0, 0);
-	// 		context.scale(-1, 1);
-	// 	});
-
-	// 	videoRef.current.addEventListener("play", () => {
-	// 		const context = canvasRef.current?.getContext("2d");
-	// 		if (context == null) {
-	// 			return;
-	// 		}
-
-	// 		const render = () => {
-	// 			context.drawImage(videoRef.current as HTMLVideoElement, 0, 0, videoRef.current?.videoWidth ?? 0, videoRef.current?.videoHeight ?? 0);
-	// 			requestAnimationFrame(render);
-	// 		}
-	// 		render();
-	// 	});
-	// }, [videoRef, canvasRef]);
 
 	if (!wrtc.isConnected) {
 		return (
