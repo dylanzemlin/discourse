@@ -5,6 +5,7 @@ declare module "iron-session" {
 			name: string;
 			email: string;
 			username: string;
+			admin: boolean;
     };
   }
 }

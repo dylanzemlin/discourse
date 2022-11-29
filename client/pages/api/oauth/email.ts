@@ -31,7 +31,8 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 			id: user.id,
 			email: user.email,
 			name: user.name,
-			username: user.username
+			username: user.username,
+			admin: user.admin
 		}
 		await req.session.save();
 		return res.status(HttpStatusCode.OK).json({
@@ -73,14 +74,16 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 			email,
 			auth_type: "password",
 			auth_email_hash: hash,
-			auth_email_salt: salt
+			auth_email_salt: salt,
+			admin: false
 		});
 
 		req.session.user = {
 			id: user.id,
 			email: user.email,
 			name: user.name,
-			username: user.username
+			username: user.username,
+			admin: user.admin
 		}
 
 		await req.session.save();

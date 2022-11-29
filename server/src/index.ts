@@ -1,7 +1,9 @@
+import { unsealData } from "iron-session";
 import Filter from "bad-words";
-import { Server } from "http";
-import { v4 } from "uuid";
 import ws from "ws";
+
+import dotenv from "dotenv";
+dotenv.config();
 
 const filter = new Filter();
 let chatHistory: {
@@ -18,9 +20,8 @@ declare module "ws" {
 }
 
 enum PackageType {
-	CONNECT,
+	INIT,
 	SEND_CHAT,
-
 	SIGNAL,
 	CLIENT_JOINED,
 	CLIENT_JOINED_ACK,
@@ -43,22 +44,40 @@ const broadcast = (data: any, blacklist?: string[]) => {
 	});
 }
 
-wss.on("connection", (localSocket, req) => {
+wss.on("connection", async (localSocket, req) => {
+	const cookies = req.headers.cookie?.split("; ").reduce((acc, cookie) => {
+		const [key, value] = cookie.split("=");
+		acc[key] = value;
+		return acc;
+	}, {} as Record<string, string>);
+
+	if (cookies?.["discourse-session"] == null) {
+		localSocket.close();
+		return;
+	}
+
+	const sessionCookie = cookies["discourse-session"];
+	const sessionData = await unsealData(sessionCookie, {
+		password: process.env.IRON_PASSWORD as string
+	});
+
+	const { id, username } = sessionData.user as any;
+	if (id == null || username == null) {
+		localSocket.close();
+		return;
+	}
+
+	localSocket.id = id;
+	localSocket.send(JSON.stringify({
+		type: PackageType.INIT,
+		chatHistory
+	}));
+
 	// Generate a unique id for each connection!
 	localSocket.on("message", (data) => {
 		const json = JSON.parse(data.toString());
 		switch (json.type) {
-			case PackageType.CONNECT: {
-				const id = localSocket.id = json.uid;
-				if (id == null) {
-					localSocket.close();
-					return;
-				}
-
-				console.log(`Client ${localSocket.id} connected!`);
-
-				clients[id] = localSocket;
-
+			case PackageType.INIT: {
 				broadcast({
 					type: PackageType.CLIENT_JOINED,
 					uid: localSocket.id

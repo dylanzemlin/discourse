@@ -82,7 +82,8 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 			email,
 			name,
 			username: login,
-			auth_type: "github"
+			auth_type: "github",
+			admin: false
 		});
 	}
 
@@ -90,7 +91,8 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		id: user.id,
 		email: user.email,
 		name: user.name,
-		username: user.username
+		username: user.username,
+		admin: user.admin
 	}
 	await req.session.save();
 

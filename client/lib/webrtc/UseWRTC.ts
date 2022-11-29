@@ -16,6 +16,8 @@ const iceConfig: RTCConfiguration = {
 const constraints = {
   audio: false,
   video: {
+    width: 640,
+    height: 480,
     aspectRatio: 1.777777778,
     frameRate: { max: 30 },
     facingMode: {
@@ -25,9 +27,8 @@ const constraints = {
 };
 
 enum PackageType {
-  CONNECT,
+  INIT,
   SEND_CHAT,
-
   SIGNAL,
   CLIENT_JOINED,
   CLIENT_JOINED_ACK,
@@ -40,14 +41,21 @@ export type WRTCOptions = {
 
 export default function useWRTC(opts: WRTCOptions) {
   const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {});
-  const [id] = useLocalStorage({
-    key: "uuid",
-    defaultValue: v4()
-  })
+  const [id] = useLocalStorage({ key: "uuid", defaultValue: v4() });
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [deafened, setDeafened] = useState(false);
+  const [muted, setMuted] = useState(true);
   const peers = useDict<string, Peer.Instance>();
   const streams = useDict<string, MediaStream>();
+
+  const send = (type: PackageType, data: any) => {
+    sendMessage(JSON.stringify({
+      type,
+      ...data
+    }));
+  }
 
   const handleJoin = (uid: string, initiator: boolean) => {
     if (localStream == null) {
@@ -64,15 +72,18 @@ export default function useWRTC(opts: WRTCOptions) {
     peers.set(uid, peer);
 
     peer.on("signal", (signal) => {
-      sendMessage(JSON.stringify({
-        type: PackageType.SIGNAL,
-        uid: uid,
+      send(PackageType.SIGNAL, {
+        uid,
         signal
-      }));
+      });
     });
 
     peer.on("stream", (stream) => {
       streams.set(uid, stream);
+
+      if(deafened) {
+        stream.getAudioTracks().forEach(track => track.enabled = false);
+      }
     });
   }
 
@@ -85,6 +96,21 @@ export default function useWRTC(opts: WRTCOptions) {
 
       const packet = JSON.parse(lastMessage.data);
       switch (packet.type) {
+        case PackageType.INIT: {
+          const stream = await navigator.mediaDevices.getUserMedia(constraints);
+          setLocalStream(stream);
+
+          const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
+          if (element == null) {
+            console.error(`Invalid local source object :(`);
+            return;
+          }
+
+          element.srcObject = stream;
+
+          send(PackageType.INIT, {});
+        } break;
+
         case PackageType.SIGNAL: {
           const peer = peers.get(packet.uid);
           if (peer == null) {
@@ -104,10 +130,9 @@ export default function useWRTC(opts: WRTCOptions) {
 
         case PackageType.CLIENT_JOINED: {
           handleJoin(packet.uid, false);
-          sendMessage(JSON.stringify({
-            type: PackageType.CLIENT_JOINED_ACK,
+          send(PackageType.CLIENT_JOINED_ACK, {
             uid: packet.uid
-          }));
+          });
         } break;
 
         case PackageType.CLIENT_JOINED_ACK: {
@@ -128,31 +153,7 @@ export default function useWRTC(opts: WRTCOptions) {
     setIsConnected(true);
   }, [readyState, sendMessage]);
 
-  useEffect(() => {
-    if (!isConnected) {
-      return;
-    }
-
-    (async () => {
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      setLocalStream(stream);
-
-      const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
-      if (element == null) {
-        console.error(`Invalid local source object :(`);
-        return;
-      }
-
-      element.srcObject = stream;
-
-      sendMessage(JSON.stringify({
-        type: PackageType.CONNECT,
-        uid: id
-      }));
-    })();
-  }, [opts.localVideoRefId, isConnected]);
-
-  const setMuted = (muted: boolean) => {
+  const toggleMuted = () => {
     if (localStream == null) {
       return;
     }
@@ -160,18 +161,43 @@ export default function useWRTC(opts: WRTCOptions) {
     localStream.getAudioTracks().forEach(track => {
       track.enabled = !muted;
     });
+    setMuted(!muted);
   }
 
-  const setVideoEnabled = (enabled: boolean) => {
-    localStream?.getVideoTracks().forEach(track => {
-      track.enabled = enabled;
+  const toggleVideo = () => {
+    if (localStream == null) {
+      return;
+    }
+
+    localStream.getVideoTracks().forEach(track => {
+      track.enabled = videoEnabled;
+    });
+    setVideoEnabled(!videoEnabled);
+  }
+
+  const toggleDeafened = () => {
+    setDeafened(!deafened);
+
+    if (localStream == null) {
+      return;
+    }
+
+    // mute all remote tracks
+    streams.values().forEach((stream) => {
+      stream.getAudioTracks().forEach(track => {
+        track.enabled = deafened;
+      });
     });
   }
 
   return {
     isConnected,
-    setMuted,
-    setVideoEnabled,
+    toggleMuted,
+    muted,
+    toggleDeafened,
+    deafened,
+    toggleVideo,
+    videoEnabled,
     remoteStreams: streams
   }
 }
