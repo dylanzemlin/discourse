@@ -107,7 +107,7 @@ wss.on("connection", async (localSocket, req) => {
 		localSocket.send(JSON.stringify({
 			type: PackageType.PING
 		}));
-	}, 1000);
+	}, 5000);
 
 	// Generate a unique id for each connection!
 	localSocket.on("message", (data) => {
@@ -207,6 +207,7 @@ wss.on("connection", async (localSocket, req) => {
 			uid: localSocket.id
 		});
 		delete clients[localSocket.id];
+		clearInterval(pingInterval);
 	});
 
 	// if they do not send CONNECT within 5 seconds, disconnect them
