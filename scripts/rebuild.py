@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, Response
 import os
 
 
@@ -20,6 +20,7 @@ def update():
     os.system("pm2 restart " + client_name)
     os.system("pm2 restart " + server_name)
 
+    return Response("Updated and restarted", status=200)
 
 if __name__ == '__main__':
     app.run(host='localhost', port=3002)
