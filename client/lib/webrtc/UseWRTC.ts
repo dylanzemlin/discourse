@@ -175,7 +175,7 @@ export default function useWRTC(opts: WRTCOptions) {
     }
 
     localStream.getAudioTracks().forEach(track => {
-      track.enabled = !muted;
+      track.enabled = muted;
     });
     setMuted(!muted);
   }
