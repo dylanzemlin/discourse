@@ -142,21 +142,20 @@ export default function useWRTC(opts: WRTCOptions) {
     }
 
     (async () => {
-      console.log("test 3");
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setLocalStream(stream);
 
-      console.log("test 2");
-      const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
-      if (element == null) {
-        console.error(`Invalid local source object :(`);
-        return;
-      }
+      const timer = setInterval(() => {
+        // Wait for the element to be rendered
+        const element = document.getElementById(opts.localVideoRefId) as HTMLVideoElement;
+        if (element == null) {
+          return;
+        }
 
-      element.srcObject = stream;
-
-      console.log("test");
-      send(PackageType.INIT, {});
+        element.srcObject = stream;
+        send(PackageType.INIT, {});
+        clearInterval(timer);
+      }, 100);
     })();
   }, [isConnected, opts.localVideoRefId, send]);
 
