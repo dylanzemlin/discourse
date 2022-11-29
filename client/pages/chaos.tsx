@@ -5,7 +5,6 @@ import { useAuthentication } from "../lib/context/auth";
 import useWRTC from "../lib/webrtc/UseWRTC";
 import { useEffect, useRef } from "react";
 import Head from "next/head";
-import Image from "next/image";
 
 type VideoProps = {
 	stream: MediaStream;
@@ -76,11 +75,10 @@ export default function Home() {
 	}
 
 	return (
-		// <MediaDeviceQuery
-		// 	audio={true}
-		// 	video={true}
-		// >
-		<>
+		<MediaDeviceQuery
+			audio={true}
+			video={true}
+		>
 			<Head>
 				<title>Discourse - Chaos</title>
 			</Head>
@@ -133,7 +131,6 @@ export default function Home() {
 					</Group>
 				</Flex>
 			</Flex>
-		</>
-
+		</MediaDeviceQuery>
 	)
 }
