@@ -126,7 +126,7 @@ export default function Home() {
 							<Headphones color={wrtc.deafened ? "red" : undefined} />
 						</Button>
 						<Button onClick={wrtc.toggleVideo}>
-							<Camera color={wrtc.videoEnabled ? "red" : undefined} />
+							<Camera color={!wrtc.videoEnabled ? "red" : undefined} />
 						</Button>
 					</Group>
 				</Flex>
