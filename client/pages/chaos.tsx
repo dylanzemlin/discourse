@@ -111,7 +111,7 @@ export default function Home() {
 						marginRight: "1rem"
 					}} />
 					<Title mr="1rem" order={2}>
-						{auth.user?.name + " - " + auth.user?.id}
+						{auth.user?.name}
 					</Title>
 					<div style={{
 						width: "3rem",
