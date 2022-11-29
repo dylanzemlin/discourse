@@ -12,7 +12,7 @@ const iceConfig: RTCConfiguration = {
 }
 
 const constraints = {
-  audio: false,
+  audio: true,
   video: {
     width: 640,
     height: 480,
@@ -162,7 +162,7 @@ export default function useWRTC(opts: WRTCOptions) {
         }
 
         element.srcObject = stream;
-        //setMuted(true);
+        setMuted(true);
         send(PackageType.INIT, {});
         clearInterval(timer);
       }, 100);
