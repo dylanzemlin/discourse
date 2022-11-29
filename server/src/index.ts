@@ -14,20 +14,33 @@ let lastChat = Date.now();
 let lastChats: Record<string, number> = {};
 
 export enum PackageType {
-  // [Server] Used to request a ping from a client
-  // [Client] Used to respond to a ping from the server
+  // [Server -> Client] Used to request a ping from a client
+  // [Client -> Server] Used to respond to a ping from the server
   PING,
 
-  // [Server] Used to broadcast a new chat message to all clients
-  // [Client] Used to send a new chat message to the server
+  // [Server -> Client] Used to broadcast a new chat message to all clients
+  // [Client -> Server] Used to send a new chat message to the server
   SEND_CHAT,
-
   
+  // [Client -> Server] Send to the server 
   INIT,
+
+  // [Client -> Server] Send a signal to another peer
+  // [Server -> Client] Send a signal to a peer
   SIGNAL,
+
+  // [Server -> Client] Send to a client when a new client joins
   CLIENT_JOINED,
+
+  // [Client -> Server] Send to the server when a client joins and is acknowledged by a peer
   CLIENT_JOINED_ACK,
-  CLIENT_DISCONNECTED
+
+  // [Server -> Client] Send to a client when a client disconnects
+  CLIENT_DISCONNECTED,
+
+  // [Server -> Client] Broadcast to all clients when a client changes their state (muted, video, etc)
+  // [Client -> Server] Send to the server when the state changes (muted, video, etc)
+  STATE_CHANGE,
 }
 
 declare module "ws" {
@@ -102,6 +115,14 @@ wss.on("connection", async (localSocket, req) => {
 		switch (json.type) {
 			case PackageType.PING: {
 				localSocket.missedPings = 0;
+			} break;
+
+			case PackageType.STATE_CHANGE: {
+				broadcast({
+					type: PackageType.STATE_CHANGE,
+					uid: localSocket.id,
+					state: json.state
+				}, [localSocket.id]);
 			} break;
 			
 			case PackageType.INIT: {

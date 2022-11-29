@@ -44,24 +44,43 @@ const constraints = {
 };
 
 export enum PackageType {
-  // [Server] Used to request a ping from a client
-  // [Client] Used to respond to a ping from the server
+  // [Server -> Client] Used to request a ping from a client
+  // [Client -> Server] Used to respond to a ping from the server
   PING,
 
-  // [Server] Used to broadcast a new chat message to all clients
-  // [Client] Used to send a new chat message to the server
+  // [Server -> Client] Used to broadcast a new chat message to all clients
+  // [Client -> Server] Used to send a new chat message to the server
   SEND_CHAT,
 
-  
+  // [Client -> Server] Send to the server 
   INIT,
+
+  // [Client -> Server] Send a signal to another peer
+  // [Server -> Client] Send a signal to a peer
   SIGNAL,
+
+  // [Server -> Client] Send to a client when a new client joins
   CLIENT_JOINED,
+
+  // [Client -> Server] Send to the server when a client joins and is acknowledged by a peer
   CLIENT_JOINED_ACK,
-  CLIENT_DISCONNECTED
+
+  // [Server -> Client] Send to a client when a client disconnects
+  CLIENT_DISCONNECTED,
+
+  // [Server -> Client] Broadcast to all clients when a client changes their state (muted, video, etc)
+  // [Client -> Server] Send to the server when the state changes (muted, video, etc)
+  STATE_CHANGE,
 }
 
 export type WRTCOptions = {
   localVideoRefId: string;
+}
+
+type PeerState = {
+  muted: boolean;
+  video: boolean;
+  deafened: boolean;
 }
 
 export default function useWRTC(opts: WRTCOptions) {
@@ -72,7 +91,9 @@ export default function useWRTC(opts: WRTCOptions) {
   const [deafened, setDeafened] = useState(false);
   const [muted, setMuted] = useState(true);
   const peers = useDict<string, Peer.Instance>();
+  const peerStates = useDict<string, PeerState>();
   const streams = useDict<string, MediaStream>();
+  const [localState, setLocalState] = useState<PeerState>({ muted, video: videoEnabled, deafened });
 
   const send = useCallback((type: PackageType, data: any) => {
     const str = JSON.stringify({
@@ -113,6 +134,11 @@ export default function useWRTC(opts: WRTCOptions) {
     });
 
     peers.set(uid, peer);
+    peerStates.set(uid, {
+      muted: true,
+      video: true,
+      deafened: false
+    });
 
     peer.on("signal", (signal) => {
       console.log("[handleJoin] signal from peer: " + uid);
@@ -143,6 +169,11 @@ export default function useWRTC(opts: WRTCOptions) {
       switch (packet.type) {
         case PackageType.PING: {
           send(PackageType.PING, {});
+        } break;
+
+        case PackageType.STATE_CHANGE: {
+          const { uid, state } = packet;
+          peerStates.set(uid, state);
         } break;
 
         case PackageType.SIGNAL: {
@@ -224,6 +255,14 @@ export default function useWRTC(opts: WRTCOptions) {
       }, 100);
     })();
   }, [isConnected, opts.localVideoRefId, send]);
+
+  useEffect(() => {
+    send(PackageType.STATE_CHANGE, { state: localState });
+  }, [localState, send]);
+
+  useEffect(() => {
+    setLocalState({ muted, video: videoEnabled, deafened });
+  }, [muted, videoEnabled, deafened]);
 
   const toggleMuted = () => {
     if (localStream == null) {
