@@ -162,7 +162,7 @@ export default function useWRTC(opts: WRTCOptions) {
         }
 
         element.srcObject = stream;
-        setMuted(true);
+        //setMuted(true);
         send(PackageType.INIT, {});
         clearInterval(timer);
       }, 100);
