@@ -24,5 +24,9 @@ export default function useDict<A extends keyof any, B>() {
     setDict(rest as Record<A, B>);
   }
 
-  return { set, get, values, keys, remove }
+  const clear = () => {
+    setDict({} as Record<A, B>);
+  }
+
+  return { set, get, values, keys, remove, clear, dict }
 }

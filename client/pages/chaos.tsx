@@ -95,10 +95,10 @@ export default function Home() {
 						}} autoPlay muted id="localVideo" ref={videoRef}></video>
 						{/* <canvas ref={canvasRef}></canvas> */}
 					</Grid.Col>
-					{wrtc.remoteStreams.keys().map((id) => {
+					{wrtc.streams.keys().map((id) => {
 						return (
 							<Grid.Col key={id} span={2}>
-								<Video id={`video:${id}`} stream={wrtc.remoteStreams.get(id)} />
+								<Video id={`video:${id}`} stream={wrtc.streams.get(id)} />
 							</Grid.Col>
 						)
 					})}

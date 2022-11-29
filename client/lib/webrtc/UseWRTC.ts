@@ -60,9 +60,9 @@ export default function useWRTC(opts: WRTCOptions) {
   const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {});
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [videoEnabled, setVideoEnabled] = useState(false);
+  const [videoEnabled, setVideoEnabled] = useState(true);
   const [deafened, setDeafened] = useState(false);
-  const [muted, setMuted] = useState(false);
+  const [muted, setMuted] = useState(true);
   const peers = useDict<string, Peer.Instance>();
   const streams = useDict<string, MediaStream>();
 
@@ -74,6 +74,22 @@ export default function useWRTC(opts: WRTCOptions) {
     console.log("[send] sending: " + str);
     sendMessage(str);
   }, [sendMessage]);
+
+  const reset = useCallback(() => {
+    peers.values().forEach((peer) => {
+      peer.destroy();
+    });
+    peers.clear();
+
+    streams.values().forEach((stream) => {
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    });
+    streams.clear();
+    setIsConnected(false);
+    setLocalStream(null);
+  }, [peers, streams]);
 
   const handleJoin = (uid: string, initiator: boolean) => {
     console.log("handleJoin 1");
@@ -155,14 +171,19 @@ export default function useWRTC(opts: WRTCOptions) {
     })();
   }, [lastMessage]);
 
+  // Triggered on every connection state change
   useEffect(() => {
+    if(readyState === ReadyState.CLOSED) {
+      reset();
+      setIsConnected(false);
+    }
+
     if (readyState !== ReadyState.OPEN) {
       return;
     }
 
-
     setIsConnected(true);
-  }, [readyState]);
+  }, [readyState, reset]);
 
   useEffect(() => {
     if (!isConnected) {
@@ -181,7 +202,6 @@ export default function useWRTC(opts: WRTCOptions) {
         }
 
         element.srcObject = stream;
-        setMuted(true);
         send(PackageType.INIT, {});
         clearInterval(timer);
       }, 100);
@@ -194,7 +214,7 @@ export default function useWRTC(opts: WRTCOptions) {
     }
 
     localStream.getAudioTracks().forEach(track => {
-      track.enabled = muted;
+      track.enabled = !muted;
     });
     setMuted(!muted);
   }
@@ -211,17 +231,17 @@ export default function useWRTC(opts: WRTCOptions) {
   }
 
   const toggleDeafened = () => {
-    // if (localStream == null) {
-    //   return;
-    // }
+    if (localStream == null) {
+      return;
+    }
 
-    // // mute all remote tracks
-    // streams.values().forEach((stream) => {
-    //   stream.getAudioTracks().forEach(track => {
-    //     track.enabled = !deafened;
-    //   });
-    // });
-    // setDeafened(!deafened);
+    // mute all remote tracks
+    streams.values().forEach((stream) => {
+      stream.getAudioTracks().forEach(track => {
+        track.enabled = !deafened;
+      });
+    });
+    setDeafened(!deafened);
   }
 
   return {
@@ -232,6 +252,6 @@ export default function useWRTC(opts: WRTCOptions) {
     deafened,
     toggleVideo,
     videoEnabled,
-    remoteStreams: streams
+    streams
   }
 }

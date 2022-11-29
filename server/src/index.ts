@@ -7,7 +7,7 @@ dotenv.config();
 
 const filter = new Filter();
 let chatHistory: {
-	socket_id: string;
+	uid: string;
 	message: string;
 }[] = [];
 let lastChat = Date.now();
@@ -134,7 +134,7 @@ wss.on("connection", async (localSocket, req) => {
 				// Clean the message and push it to the history
 				const message = filter.clean(json.message);
 				chatHistory.push({
-					socket_id: localSocket.id,
+					uid: localSocket.id,
 					message
 				});
 
@@ -147,7 +147,7 @@ wss.on("connection", async (localSocket, req) => {
 				broadcast({
 					type: PackageType.SEND_CHAT,
 					message: message,
-					socket_id: localSocket.id,
+					uid: localSocket.id,
 					name: json.name
 				});
 			} break;
@@ -155,11 +155,11 @@ wss.on("connection", async (localSocket, req) => {
 	});
 
 	localSocket.on("close", () => {
-		delete clients[localSocket.id];
 		broadcast({
 			type: PackageType.CLIENT_DISCONNECTED,
-			socket_id: localSocket.id
+			uid: localSocket.id
 		});
+		delete clients[localSocket.id];
 	});
 
 	// if they do not send CONNECT within 5 seconds, disconnect them
