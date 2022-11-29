@@ -6,9 +6,28 @@ import Peer from "simple-peer";
 const iceConfig: RTCConfiguration = {
   iceServers: [
     {
-      urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302"],
+      urls: "stun:openrelay.metered.ca:80",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: "turn:openrelay.metered.ca:443?transport=tcp",
+      username: "openrelayproject",
+      credential: "openrelayproject",
+    },
+    {
+      urls: ["stun:stun1.l.google.com:19302", "stun:stun2.l.google.com:19302", "stun:stun3.l.google.com:19302", "stun:stun4.l.google.com:19302"],
     }
-  ]
+  ],
+  iceCandidatePoolSize: 10
 }
 
 const constraints = {
@@ -195,7 +214,7 @@ export default function useWRTC(opts: WRTCOptions) {
     // if (localStream == null) {
     //   return;
     // }
-    
+
     // // mute all remote tracks
     // streams.values().forEach((stream) => {
     //   stream.getAudioTracks().forEach(track => {
