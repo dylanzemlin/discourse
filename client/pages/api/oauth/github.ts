@@ -6,6 +6,7 @@ import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { withSessionRoute } from "@lib/iron";
 import pocket from "@lib/pocket";
 import FormData from "form-data";
+import fetch from "node-fetch";
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
 	const pb = await pocket();
@@ -45,7 +46,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		});
 	}
 
-	const { access_token, scope } = await authResponse.json();
+	const { access_token, scope } = await authResponse.json() as any;
 	if (!(scope as string).includes("user:email")) {
 		return res.status(HttpStatusCode.BAD_REQUEST).json({
 			error_code: DiscourseErrorCode.OAUTH_BAD_SCOPES,
@@ -70,7 +71,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		});
 	}
 
-	const { login, email, name, avatar_url } = await userResponse.json();
+	const { login, email, name, avatar_url } = await userResponse.json() as any;
 	let user;
 	try {
 		user = await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);

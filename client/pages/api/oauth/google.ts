@@ -7,6 +7,7 @@ import { withSessionRoute } from "@lib/iron";
 import formurlencoded from "form-urlencoded";
 import pocket from "@lib/pocket";
 import FormData from "form-data";
+import fetch from "node-fetch";
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
   const { code, error } = req.query;
@@ -37,7 +38,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
     return res.redirect(`/?error=internal_server_error:1`);
   }
 
-  const { access_token } = await result.json();
+  const { access_token } = await result.json() as any;
   const profileInfo = await fetch("https://www.googleapis.com/oauth2/v1/userinfo", {
     headers: {
       "Authorization": `Bearer ${access_token}`
@@ -47,7 +48,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
     return res.redirect(`/?error=internal_server_error:2`);
   }
 
-  const { email, name, picture, given_name } = await profileInfo.json();
+  const { email, name, picture, given_name } = await profileInfo.json() as any;
   const pb = await pocket();
   let user;
   try {
