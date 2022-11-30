@@ -1,7 +1,7 @@
-import HttpStatusCode from "../../../../lib/api/HttpStatusCode";
-import { withSessionRoute } from "../../../../lib/iron";
 import { NextApiRequest, NextApiResponse } from "next";
-import pocket from "../../../../lib/pocket";
+import HttpStatusCode from "@lib/api/HttpStatusCode";
+import { withSessionRoute } from "@lib/iron";
+import pocket from "@lib/pocket";
 
 const deleteUser = async (req: NextApiRequest, res: NextApiResponse) => {
   const ps = await pocket();

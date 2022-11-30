@@ -1,6 +1,6 @@
-import HttpStatusCode from "../../lib/api/HttpStatusCode";
 import { NextApiRequest, NextApiResponse } from "next";
-import { withSessionRoute } from "../../lib/iron";
+import HttpStatusCode from "@lib/api/HttpStatusCode";
+import { withSessionRoute } from "@lib/iron";
 
 export default withSessionRoute(function Route(req: NextApiRequest, res: NextApiResponse) {
 	if (req.method === "DELETE") {

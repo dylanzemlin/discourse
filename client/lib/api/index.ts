@@ -21,7 +21,7 @@ export type APIResponse<T> = {
 }
 
 export interface API {
-	REGISTER_USER(name: string, email: string, password: string): Promise<APIResponse<boolean>>;
+	REGISTER_USER(displayname: string, username: string, email: string, password: string): Promise<APIResponse<boolean>>;
 	LOGIN_USER(email: string, password: string, remember: boolean): Promise<APIResponse<boolean>>;
 }
 

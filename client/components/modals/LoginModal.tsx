@@ -1,10 +1,10 @@
 import { Anchor, Button, Checkbox, Divider, Flex, Modal, PasswordInput, TextInput, Title } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
-import HttpStatusCode from "../../lib/api/HttpStatusCode";
+import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
-import v1 from "../../lib/api/v1";
 import { useState } from "react";
+import v1 from "@lib/api/v1";
 
 const github_params = new URLSearchParams({
 	client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID as string,
@@ -12,6 +12,15 @@ const github_params = new URLSearchParams({
 	scope: "user:email"
 });
 const github_uri = `https://github.com/login/oauth/authorize?${github_params.toString()}`;
+
+const google_params = new URLSearchParams({
+	client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
+	redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI as string,
+	scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+	response_type: "code",
+	prompt: "consent"
+});
+const google_uri = `https://accounts.google.com/o/oauth2/v2/auth?${google_params.toString()}`;
 
 export default function LoginModal() {
 	// Router Usage
@@ -117,7 +126,7 @@ export default function LoginModal() {
 					gap="md"
 					mt="xl"
 				>
-					<Anchor href="/google">Google</Anchor>
+					<Anchor href={google_uri}>Google</Anchor>
 					<Anchor href={github_uri}>Github</Anchor>
 				</Flex>
 			</Modal>

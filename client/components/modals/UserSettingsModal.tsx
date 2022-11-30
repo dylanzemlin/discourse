@@ -4,7 +4,7 @@ import { useLocalStorage } from "@mantine/hooks";
 import { FileUpload } from "tabler-icons-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import useApi from "../../lib/useApi";
+import useApi from "@lib/useApi";
 
 type UserSettingsModalProps = {
   opened: boolean;
@@ -38,7 +38,7 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
       return;
     }
 
-    setDisplayname(data.settings.name);
+    setDisplayname(data.settings.displayName);
     setEmail(data.email);
   }, [data]);
 

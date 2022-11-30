@@ -5,7 +5,9 @@ export type AuthState = {
 	authed: boolean;
 	user: {
 		id: string;
-		name: string;
+		displayname: string;
+		username: string;
+		flags: number;
 		email: string;
 	} | undefined,
 	verifyAuth: () => Promise<void>;
@@ -28,7 +30,9 @@ export function AuthenticationProvider({ children }: any) {
 	const [authed, setAuthed] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [id, setUid] = useState<string | undefined>();
-	const [name, setName] = useState<string | undefined>();
+	const [username, setUsername] = useState<string | undefined>();
+	const [displayname, setDisplayname] = useState<string | undefined>();
+	const [flags, setFlags] = useState<number>(0);
 	const [email, setEmail] = useState<string | undefined>();
 
 	const verifyAuth = async () => {
@@ -40,7 +44,9 @@ export function AuthenticationProvider({ children }: any) {
 
 			const data = await result.json();
 			setUid(data.id);
-			setName(data.name);
+			setUsername(data.username);
+			setDisplayname(data.displayname);
+			setFlags(data.flags);
 			setEmail(data.email);
 			setAuthed(true);
 		} catch {
@@ -60,8 +66,10 @@ export function AuthenticationProvider({ children }: any) {
 		authed,
 		user: {
 			id: id as string,
-			name: name as string,
-			email: email as string
+			email: email as string,
+			displayname: displayname as string,
+			username: username as string,
+			flags
 		},
 		verifyAuth,
 		loading

@@ -1,8 +1,9 @@
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useCallback, useEffect, useState } from "react";
+import { useAuthentication } from "../context/auth";
+import { useMediaQuery } from "@mantine/hooks";
 import useDict from "../useDict";
 import Peer from "simple-peer";
-import { useAuthentication } from "../context/auth";
 
 const iceConfig: RTCConfiguration = {
   iceServers: [
@@ -34,8 +35,8 @@ const iceConfig: RTCConfiguration = {
 const constraints = {
   audio: true,
   video: {
-    // width: 640,
-    // height: 480,
+    width: 640,
+    height: 480,
     aspectRatio: 4 / 3, // 4:3
     frameRate: { max: 30 },
     facingMode: {
@@ -100,6 +101,9 @@ export default function useWRTC() {
 
   // Auth Data
   const auth = useAuthentication();
+
+  // Mobile Detection
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const send = useCallback((type: PackageType, data: any) => {
     const str = JSON.stringify({
@@ -241,6 +245,11 @@ export default function useWRTC() {
     }
 
     (async () => {
+      if(isMobile) {
+        constraints.video.width = 320;
+        constraints.video.height = 240;
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       setLocalStream(stream);
 
@@ -258,8 +267,8 @@ export default function useWRTC() {
   }, [localState, send]);
 
   useEffect(() => {
-    setLocalState({ muted, video: videoEnabled, deafened, name: auth.user?.name ?? "John Doe" });
-  }, [muted, videoEnabled, deafened, auth.user?.name]);
+    setLocalState({ muted, video: videoEnabled, deafened, name: auth.user?.username ?? "John Doe" });
+  }, [muted, videoEnabled, deafened, auth.user?.username]);
 
   const toggleMuted = () => {
     if (localStream == null) {

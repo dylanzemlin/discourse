@@ -1,10 +1,10 @@
-import { DiscourseErrorCode } from "../../../lib/api/DiscourseErrorCode";
-import { DiscouseUserFlags } from "../../../lib/api/DiscourseUserFlags";
-import { generateSalt, hashPassword } from "../../../lib/crypto";
-import HttpStatusCode from "../../../lib/api/HttpStatusCode";
+import { DiscourseErrorCode } from "@lib/api/DiscourseErrorCode";
+import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
+import { generateSalt, hashPassword } from "@lib/crypto";
 import { NextApiRequest, NextApiResponse } from "next";
-import { withSessionRoute } from "../../../lib/iron";
-import pocket from "../../../lib/pocket";
+import HttpStatusCode from "@lib/api/HttpStatusCode";
+import { withSessionRoute } from "@lib/iron";
+import pocket from "@lib/pocket";
 
 const login = async (req: NextApiRequest, res: NextApiResponse) => {
 	const { email, password } = req.query;
@@ -31,7 +31,7 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 		req.session.user = {
 			id: user.id,
 			email: user.email,
-			name: user.settings.name,
+			displayname: user.settings.displayName,
 			username: user.username,
 			flags: user.flags
 		}
@@ -48,7 +48,7 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 }
 
 const register = async (req: NextApiRequest, res: NextApiResponse) => {
-	const { username, name, email, password } = req.query;
+	const { username, displayname, email, password } = req.query;
 	const pb = await pocket();
 
 	try {
@@ -71,13 +71,13 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 		const hash = await hashPassword(password as string, salt);
 		const user = await pb.collection("users").create<any>({
 			email,
-			username: username ?? (name as string).toLowerCase().replace(" ", "_"),
+			username: username,
 			auth_type: "password",
 			auth_email_hash: hash,
 			auth_email_salt: salt,
 			flags: DiscouseUserFlags.None,
 			settings: {
-				name: name ?? username,
+				displayName: displayname ?? username,
 				theme: "dark"
 			}
 		});
@@ -85,7 +85,7 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 		req.session.user = {
 			id: user.id,
 			email: user.email,
-			name: user.settings.name,
+			displayname: user.settings.displayName,
 			username: user.username,
 			flags: user.flags
 		}

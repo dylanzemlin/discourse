@@ -1,18 +1,20 @@
-import { Button, Flex, Group, LoadingOverlay, Title } from "@mantine/core";
-import MediaDeviceQuery from "../components/queries/MediaDeviceQuery";
-import { Headphones, Microphone, Camera } from "tabler-icons-react";
-import { useAuthentication } from "../lib/context/auth";
-import useWRTC from "../lib/webrtc/useWRTC";
+import { ActionIcon, Button, Flex, Group, LoadingOverlay, Menu, Title } from "@mantine/core";
+import { Headphones, Microphone, Camera, Menu2 as MenuIcon } from "tabler-icons-react";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import UserSettingsModal from "@modals/UserSettingsModal";
+import MediaDeviceQuery from "@queries/MediaDeviceQuery";
+import { useAuthentication } from "@lib/context/auth";
 import { useEffect, useRef } from "react";
+import useWRTC from "@lib/webrtc/useWRTC";
 import Image from "next/image";
 import Head from "next/head";
-import { useDisclosure } from "@mantine/hooks";
-import UserSettingsModal from "../components/modals/UserSettingsModal";
 
 type VideoProps = {
 	stream: MediaStream | null;
 	state: any;
 	uid: string;
+	isLocal: boolean;
+	isMobile: boolean;
 }
 
 function Video(props: VideoProps) {
@@ -45,28 +47,74 @@ function Video(props: VideoProps) {
 					</>
 				) : (
 					<Flex w="100%" h="100%" align="center" justify="center" gap="2rem">
-						<Image unoptimized src={`/api/avatar?id=${props.uid}`} alt={`${props.uid}'s Avatar`} width={128} height={128} style={{
+						<Image unoptimized src={`/api/avatar?uid=${props.uid}`} alt={`${props.uid}'s Avatar`} width={128} height={128} style={{
 							borderRadius: "50%",
 						}} />
 						<Title order={2}>John Doe</Title>
 					</Flex>
 				)}
 			</div>
-			<video style={{
-				width: "640px",
-				height: "480px",
-				// width: "320px",
-				// height: "240px",
-			}} ref={ref} autoPlay />
+			<video ref={ref} muted={props.isLocal || props.state?.muted} autoPlay />
 		</div>
+	)
+}
+
+type ActionMenuProps = {
+	toggleMuted: () => void;
+	toggleDeafened: () => void;
+	toggleVideo: () => void;
+	localState: any;
+	isMobile: boolean;
+}
+
+function ActionMenu(props: ActionMenuProps) {
+	if (props.isMobile) {
+		return (
+			<Menu shadow="md" width={200} closeOnItemClick={false} position="left">
+				<Menu.Target>
+					<ActionIcon>
+						<MenuIcon size={60} />
+					</ActionIcon>
+				</Menu.Target>
+
+				<Menu.Dropdown>
+					<Group ml="lg">
+						<Menu.Item onClick={props.toggleMuted} icon={<Microphone color={props.localState?.muted ? "red" : undefined} />}>
+							{props.localState?.muted ? "Unmute" : "Mute"}
+						</Menu.Item>
+						<Menu.Item onClick={props.toggleDeafened} icon={<Headphones color={props.localState?.deafened ? "red" : undefined} />}>
+							{props.localState?.deafened ? "Undeafen" : "Deafen"}
+						</Menu.Item>
+						<Menu.Item onClick={props.toggleVideo} icon={<Camera color={!props.localState?.video ? "red" : undefined} />}>
+							{props.localState?.video ? "Disable Video" : "Enable Video"}
+						</Menu.Item>
+					</Group>
+				</Menu.Dropdown>
+			</Menu>
+		)
+	}
+
+	return (
+		<Group ml="lg">
+			<Button onClick={props.toggleMuted}>
+				<Microphone color={props.localState?.muted ? "red" : undefined} />
+			</Button>
+			<Button onClick={props.toggleDeafened}>
+				<Headphones color={props.localState?.deafened ? "red" : undefined} />
+			</Button>
+			<Button onClick={props.toggleVideo}>
+				<Camera color={!props.localState?.video ? "red" : undefined} />
+			</Button>
+		</Group>
 	)
 }
 
 export default function Chaos() {
 	// Handle all the WebRTC stuff
+	const [showSettings, settingsHandler] = useDisclosure(false);
+	const isMobile = useMediaQuery("(max-width: 768px)");
 	const auth = useAuthentication();
 	const wrtc = useWRTC();
-	const [showSettings, settingsHandler] = useDisclosure(false);
 
 	if (!wrtc.isConnected || auth.user == null) {
 		return (
@@ -77,7 +125,7 @@ export default function Chaos() {
 	return (
 		<MediaDeviceQuery
 			audio={true}
-			video={true}
+			video={true} // Always forced to use video :)
 		>
 			<Head>
 				<title>Discourse - Chaos</title>
@@ -90,52 +138,43 @@ export default function Chaos() {
 					overflowY: "auto",
 					gap: "1rem",
 					width: "100%",
-					height: "100%"
+					height: "100%",
+					justifyContent: isMobile ? "center" : undefined
 				}}>
-					<Video uid={auth.user.id} state={wrtc.localState} stream={wrtc.localStream} />
+					<Video isMobile={isMobile} isLocal uid={auth.user.id} state={wrtc.localState} stream={wrtc.localStream} />
 					{wrtc.streams.keys().map((uid) => {
 						return (
-							<Video uid={uid} stream={wrtc.streams.get(uid)} state={wrtc.peerStates.get(uid)} key={uid} />
+							<Video isMobile={isMobile} isLocal={false} uid={uid} stream={wrtc.streams.get(uid)} state={wrtc.peerStates.get(uid)} key={uid} />
 						)
 					})}
 				</div>
-				<Flex p="0.5rem" style={{
+				<Flex p="0rem 0.3rem" pr="1.5rem" style={{
 					marginTop: "auto",
 					width: "100%",
 					alignItems: "center",
 				}}>
 					<Group style={{
 						borderRadius: "5px",
-						padding: "0.5rem"
-					}} mr="1rem" sx={{
+					}} mr="1rem" p="sm" pb={isMobile ? "md" : "lg"} sx={{
 						"&:hover": {
 							backgroundColor: "rgba(0, 0, 0, 0.3)",
 							cursor: "pointer"
 						}
 					}} onClick={settingsHandler.open}>
-						<Image unoptimized src="/api/avatar" alt={`${auth.user?.name}'s Avatar`} width={64} height={64} style={{
+						<Image unoptimized src="/api/avatar" alt={`${auth.user?.displayname}'s Avatar`} width={isMobile ? 48 : 64} height={isMobile ? 48 : 64} style={{
 							borderRadius: "50%"
 						}} />
-						<Title order={2}>
-							{auth.user?.name}
+						<Title order={isMobile ? 4 : 2}>
+							{auth.user?.displayname}
 						</Title>
 					</Group>
 					<div style={{
-						width: "3rem",
+						flexGrow: 1,
 						height: "3px",
-						backgroundColor: "#fff"
+						backgroundColor: "#fff",
+						marginRight: "1rem"
 					}} />
-					<Group ml="lg">
-						<Button onClick={wrtc.toggleMuted}>
-							<Microphone color={wrtc.localState?.muted ? "red" : undefined} />
-						</Button>
-						<Button onClick={wrtc.toggleDeafened}>
-							<Headphones color={wrtc.localState?.deafened ? "red" : undefined} />
-						</Button>
-						<Button onClick={wrtc.toggleVideo}>
-							<Camera color={!wrtc.localState?.video ? "red" : undefined} />
-						</Button>
-					</Group>
+					<ActionMenu isMobile={isMobile} toggleDeafened={wrtc.toggleDeafened} toggleMuted={wrtc.toggleMuted} toggleVideo={wrtc.toggleVideo} localState={wrtc.localState} />
 				</Flex>
 			</Flex>
 			<UserSettingsModal opened={showSettings} onClose={settingsHandler.close} />

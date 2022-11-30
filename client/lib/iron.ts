@@ -6,7 +6,7 @@ declare module "iron-session" {
 	interface IronSessionData {
 		user?: {
 			id: string;
-			name: string;
+			displayname: string;
 			email: string;
 			username: string;
 			flags: DiscouseUserFlags;

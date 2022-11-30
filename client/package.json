@@ -43,6 +43,7 @@
   "eslint": "8.27.0",
   "eslint-config-next": "13.0.2",
   "form-data": "^4.0.0",
+  "form-urlencoded": "^6.1.0",
   "formidable": "^2.0.1",
   "iron-session": "^6.3.1",
   "next": "13.0.2",

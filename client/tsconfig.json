@@ -13,7 +13,12 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
-    "incremental": true
+    "incremental": true,
+    "paths": {
+      "@lib/*": ["./lib/*"],
+      "@modals/*": ["./components/modals/*"],
+      "@queries/*": ["./components/queries/*"],
+    }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "../global/enums.ts"],
   "exclude": ["node_modules"]

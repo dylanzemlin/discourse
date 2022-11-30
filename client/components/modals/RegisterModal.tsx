@@ -1,10 +1,10 @@
 import { Anchor, Button, Divider, Flex, Modal, PasswordInput, TextInput, Title } from "@mantine/core";
-import HttpStatusCode from "../../lib/api/HttpStatusCode";
 import { showNotification } from "@mantine/notifications";
+import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { useDisclosure } from "@mantine/hooks";
 import { useRouter } from "next/router";
-import v1 from "../../lib/api/v1";
 import { useState } from "react";
+import v1 from "@lib/api/v1";
 
 const github_params = new URLSearchParams({
 	client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID as string,
@@ -12,6 +12,15 @@ const github_params = new URLSearchParams({
 	scope: "user:email"
 });
 const github_uri = `https://github.com/login/oauth/authorize?${github_params.toString()}`;
+
+const google_params = new URLSearchParams({
+	client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID as string,
+	redirect_uri: process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI as string,
+	scope: "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email",
+	response_type: "code",
+	prompt: "consent"
+});
+const google_uri = `https://accounts.google.com/o/oauth2/v2/auth?${google_params.toString()}`;
 
 export default function RegisterModal() {
 	// Router Usage
@@ -23,8 +32,10 @@ export default function RegisterModal() {
 	// Login States
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const [name, setName] = useState("");
+	const [displayname, setDisplayname] = useState("");
+	const [username, setUsername] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [blurred, setBlurred] = useState(false);
 
 	const validatePassword = () => {
 		if (password.length === 0) {
@@ -32,14 +43,14 @@ export default function RegisterModal() {
 		}
 
 		// Check for password length
-		if (password.length < 8) {
-			return "Password must be at least 8 characters long";
+		if (password.length < 6) {
+			return "Password must be at least 6 characters long";
 		}
 
 		// Check for at least 1 symbol
-		if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-			return "Password must contain at least 1 symbol";
-		}
+		// if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+		// 	return "Password must contain at least 1 symbol";
+		// }
 
 		// Check for at least 1 number
 		if (!/(?=.*\d)/.test(password)) {
@@ -72,7 +83,7 @@ export default function RegisterModal() {
 		e.preventDefault();
 		setLoading(true);
 
-		const result = await v1.REGISTER_USER(name, email, password);
+		const result = await v1.REGISTER_USER(displayname, username, email, password);
 
 		setLoading(false);
 
@@ -106,12 +117,20 @@ export default function RegisterModal() {
 						gap="md"
 					>
 						<TextInput
-							value={name}
-							onChange={(e) => setName(e.currentTarget.value)}
+							value={username}
+							onChange={(e) => setUsername(e.currentTarget.value)}
+							placeholder="johndoe"
+							withAsterisk
+							variant="filled"
+							label="Username"
+						/>
+						<TextInput
+							value={displayname}
+							onChange={(e) => setDisplayname(e.currentTarget.value)}
 							placeholder="John Doe"
 							withAsterisk
 							variant="filled"
-							label="Full Name"
+							label="Display Name"
 						/>
 						<TextInput
 							value={email}
@@ -129,7 +148,8 @@ export default function RegisterModal() {
 							withAsterisk
 							variant="filled"
 							label="Password"
-							error={validatePassword()}
+							onBlur={() => setBlurred(true)}
+							error={blurred ? validatePassword() : undefined}
 						/>
 					</Flex>
 				</form>
@@ -158,7 +178,7 @@ export default function RegisterModal() {
 					gap="md"
 					mt="xl"
 				>
-					<Anchor href="/google">Google</Anchor>
+					<Anchor href={google_uri}>Google</Anchor>
 					<Anchor href={github_uri}>Github</Anchor>
 				</Flex>
 			</Modal>

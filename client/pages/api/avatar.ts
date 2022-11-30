@@ -1,10 +1,10 @@
-import HttpStatusCode from "../../lib/api/HttpStatusCode";
 import { NextApiRequest, NextApiResponse } from "next";
-import { withSessionRoute } from "../../lib/iron";
-import pocket from "../../lib/pocket";
+import HttpStatusCode from "@lib/api/HttpStatusCode";
+import { withSessionRoute } from "@lib/iron";
+import { createReadStream } from "fs";
 import formidable from "formidable";
+import pocket from "@lib/pocket";
 import FormData from "form-data";
-import fs from "fs";
 
 export const config = {
   api: {
@@ -16,12 +16,11 @@ async function getAvatar(req: NextApiRequest, res: NextApiResponse) {
   const pb = await pocket();
   const avatars = pb.collection("avatars");
   try {
-    const avatar = await avatars.getFirstListItem(`uid = "${req.session.user?.id}"`);
+    const avatar = await avatars.getFirstListItem(`uid = "${req.query.uid ?? req.session.user?.id}"`);
     const avatarFile = pb.getFileUrl(avatar, avatar.file);
     return res.redirect(avatarFile);
   } catch (e) {
     const defaultAvatar = await avatars.getFirstListItem(`uid = "default"`);
-    console.log(defaultAvatar);
     const avatarFile = pb.getFileUrl(defaultAvatar, defaultAvatar.file);
     return res.redirect(avatarFile);
   }
@@ -43,7 +42,7 @@ async function setAvatar(req: NextApiRequest, res: NextApiResponse) {
     const file = files.file as formidable.File;
     const filePath = file.filepath;
     const form = new FormData();
-    form.append("file", fs.createReadStream(filePath)); 
+    form.append("file", createReadStream(filePath)); 
     
     try {
       const avatar = await avatars.getFirstListItem(`uid = "${req.session.user?.id}"`);
