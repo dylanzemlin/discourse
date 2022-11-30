@@ -39,7 +39,7 @@ export default function Home() {
 				<Title align="center" size={isMobile ? "4rem" : "7rem"} order={1}>Discourse</Title>
 				<Title align="center" order={isMobile ? 5 : 3}>A video, voice, and chat platform to connect with people all across the world in one central room.</Title>
 
-				<Flex mt="xl" gap="xl" hidden={auth.loading}>
+				<Flex mt="xl" gap="xl">
 					{(!auth.user || auth.loading) ? (
 						<LoginRegisterModal />
 					) : (
