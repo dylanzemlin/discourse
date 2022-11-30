@@ -44,11 +44,13 @@ export default function Home() {
 						<LoginRegisterModal />
 					) : (
 						<>
-							<Button w={`${isMobile ? 125 : 200}px`} h="50px" color="red" style={{
-								fontSize: "1.5rem"
+							<Button w={`${isMobile ? 125 : 200}px`} h="50px" style={{
+								fontSize: "1.5rem",
+								backgroundColor: "var(--discourse-primary)",
 							}} onClick={() => router.push("/chaos")}>Enter Chaos</Button>
-							<Button w={`${isMobile ? 125 : 200}px`} h="50px" color="red" style={{
-								fontSize: "1.5rem"
+							<Button w={`${isMobile ? 125 : 200}px`} h="50px" style={{
+								fontSize: "1.5rem",
+								backgroundColor: "#B33A3A",
 							}} onClick={auth.logout}>Logout</Button>
 						</>
 					)}
