@@ -95,20 +95,13 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		});
 
 		const avatar_result = await fetch(avatar_url);
-		if (avatar_result.ok) {
-			if (!existsSync("./tmp")) {
-				mkdirSync("./tmp");
-			}
+    if (avatar_result.ok) {
+      if (!existsSync("./public/avatars")) {
+        mkdirSync("./public/avatars");
+      }
 
-			appendFileSync(`./tmp/${user.id}.png`, Buffer.from(await avatar_result.arrayBuffer()));
-
-			const form = new FormData();
-			form.append("file", createReadStream(`./tmp/${user.id}.png`));
-			form.append("uid", user.id);
-
-			await pb.collection("avatars").create(form);
-			unlinkSync(`./tmp/${user.id}.png`);
-		}
+      appendFileSync(`./public/avatars/${user.id}.png`, Buffer.from(await avatar_result.arrayBuffer()));
+    }
 	}
 
 	req.session.user = {

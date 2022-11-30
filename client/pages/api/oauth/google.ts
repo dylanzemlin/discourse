@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, appendFileSync, unlinkSync, createReadStream } from "fs";
+import { existsSync, mkdirSync, appendFileSync } from "fs";
 import { DiscourseErrorCode } from "@lib/api/DiscourseErrorCode";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -6,7 +6,6 @@ import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { withSessionRoute } from "@lib/iron";
 import formurlencoded from "form-urlencoded";
 import pocket from "@lib/pocket";
-import FormData from "form-data";
 import fetch from "node-fetch";
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
@@ -74,18 +73,11 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 
     const avatar_result = await fetch(picture);
     if (avatar_result.ok) {
-      if (!existsSync("./tmp")) {
-        mkdirSync("./tmp");
+      if (!existsSync("./public/avatars")) {
+        mkdirSync("./public/avatars");
       }
 
-      appendFileSync(`./tmp/${user.id}.png`, Buffer.from(await avatar_result.arrayBuffer()));
-
-      const form = new FormData();
-      form.append("file", createReadStream(`./tmp/${user.id}.png`));
-      form.append("uid", user.id);
-
-      await pb.collection("avatars").create(form);
-      unlinkSync(`./tmp/${user.id}.png`);
+      appendFileSync(`./public/avatars/${user.id}.png`, Buffer.from(await avatar_result.arrayBuffer()));
     }
   }
 

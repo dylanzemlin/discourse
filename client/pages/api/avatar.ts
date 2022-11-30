@@ -1,10 +1,9 @@
+import { getSavedAvatar, saveAvatar } from "@lib/server/avatars";
 import { NextApiRequest, NextApiResponse } from "next";
 import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { withSessionRoute } from "@lib/iron";
-import { createReadStream } from "fs";
+import { readFileSync } from "fs";
 import formidable from "formidable";
-import pocket from "@lib/pocket";
-import FormData from "form-data";
 
 export const config = {
   api: {
@@ -13,23 +12,20 @@ export const config = {
 }
 
 async function getAvatar(req: NextApiRequest, res: NextApiResponse) {
-  const pb = await pocket();
-  const avatars = pb.collection("avatars");
-  try {
-    const avatar = await avatars.getFirstListItem(`uid = "${req.query.uid ?? req.session.user?.id}"`);
-    const avatarFile = pb.getFileUrl(avatar, avatar.file);
-    return res.redirect(avatarFile);
-  } catch (e) {
-    const defaultAvatar = await avatars.getFirstListItem(`uid = "default"`);
-    const avatarFile = pb.getFileUrl(defaultAvatar, defaultAvatar.file);
-    return res.redirect(avatarFile);
+  if(req.session?.user?.id == null && req.query.id == null) {
+    return res.status(HttpStatusCode.UNAUTHORIZED).end();
   }
+
+  const avatar = getSavedAvatar(req.session.user?.id ?? req.query.uid as string);
+  res.setHeader("Content-Type", "image/png");
+  res.status(HttpStatusCode.OK).send(avatar);
 }
 
 async function setAvatar(req: NextApiRequest, res: NextApiResponse) {
-  const pb = await pocket();
-  const avatars = pb.collection("avatars");
-
+  if(req.session?.user?.id == null) {
+    return res.status(HttpStatusCode.UNAUTHORIZED).end();
+  }
+  
   const form = new formidable.IncomingForm();
   form.parse(req, async (err, fields, files) => {
     if (err) {
@@ -38,20 +34,8 @@ async function setAvatar(req: NextApiRequest, res: NextApiResponse) {
         error: err.message,
       });
     }
-
     const file = files.file as formidable.File;
-    const filePath = file.filepath;
-    const form = new FormData();
-    form.append("file", createReadStream(filePath)); 
-    
-    try {
-      const avatar = await avatars.getFirstListItem(`uid = "${req.session.user?.id}"`);
-      avatars.update(avatar.id, form);
-    } catch {
-      form.append("uid", req.session.user?.id ?? "");
-      await avatars.create(form);
-    }
-
+    saveAvatar(req.session.user!.id, readFileSync(file.filepath));
     return res.status(HttpStatusCode.OK).end();
   });
 }
