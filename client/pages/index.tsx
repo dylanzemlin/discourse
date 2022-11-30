@@ -1,9 +1,8 @@
-import RegisterModal from "../components/modals/RegisterModal";
-import LoginModal from "../components/modals/LoginModal";
 import { useAuthentication } from "../lib/context/auth";
 import { Button, Flex, Title } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useRouter } from "next/router";
+import LoginRegisterModal from "@modals/LoginRegisterModal";
 
 export default function Home() {
 	const isMobile = useMediaQuery("(max-width: 768px)");
@@ -52,14 +51,13 @@ export default function Home() {
 
 				<Flex mt="xl" gap="xl" hidden={auth.loading}>
 					{!auth.authed ? (
-						<>
-							<LoginModal />
-							<RegisterModal />
-						</>
+						<LoginRegisterModal />
 					) : (
 						<>
-							<Button size={isMobile ? "sm" : "lg"} color="green" onClick={chaos}>Enter Chaos</Button>
-							<Button size={isMobile ? "sm" : "lg"} color="red" onClick={logout}>Logout</Button>
+							<LoginRegisterModal />
+							<Button w={`${isMobile ? 125 : 200}px`} h="50px" color="red" style={{
+								fontSize: "1.5rem"
+							}} onClick={logout}>Logout</Button>
 						</>
 					)}
 				</Flex>

@@ -1,5 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 
+:root {
+  --discourse-primary: #22A39F;
+  --discourse-secondary: #0D4C92;
+  --discourse-kinda-white: #F3EFE0; 
+
+  --discourse-dark: #222222;
+  --discourse-light: #434242;
+}
+
 html,
 body {
   font-family: 'Open Sans', sans-serif;
