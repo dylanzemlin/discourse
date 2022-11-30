@@ -78,7 +78,6 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 			flags: DiscouseUserFlags.None,
 			settings: {
 				name: name ?? username,
-				avatar: null,
 				theme: "dark"
 			}
 		});

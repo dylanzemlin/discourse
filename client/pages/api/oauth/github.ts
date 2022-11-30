@@ -86,10 +86,11 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 			flags: DiscouseUserFlags.None,
 			settings: {
 				name: name ?? login,
-				avatar: avatar_url,
 				theme: "dark"
 			}
 		});
+
+		// TODO: Upload avatar_url to avatars collection
 	}
 
 	req.session.user = {
