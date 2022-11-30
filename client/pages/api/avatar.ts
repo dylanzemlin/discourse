@@ -12,7 +12,7 @@ export const config = {
 }
 
 async function getAvatar(req: NextApiRequest, res: NextApiResponse) {
-  if(req.session?.user?.id == null && req.query.id == null) {
+  if (req.session?.user?.id == null && req.query.uid == null) {
     return res.status(HttpStatusCode.UNAUTHORIZED).end();
   }
 
@@ -22,10 +22,10 @@ async function getAvatar(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function setAvatar(req: NextApiRequest, res: NextApiResponse) {
-  if(req.session?.user?.id == null) {
+  if (req.session?.user?.id == null) {
     return res.status(HttpStatusCode.UNAUTHORIZED).end();
   }
-  
+
   const form = new formidable.IncomingForm();
   form.parse(req, async (err, fields, files) => {
     if (err) {
