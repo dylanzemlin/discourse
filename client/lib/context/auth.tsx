@@ -1,82 +1,74 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import HttpStatusCode from "../api/HttpStatusCode";
+import { destroyCookie } from "nookies";
 
 export type AuthState = {
-	authed: boolean;
-	user: {
-		id: string;
-		displayname: string;
-		username: string;
-		flags: number;
-		email: string;
-	} | undefined,
-	verifyAuth: () => Promise<void>;
+	user: AuthenticatedUser | null;
 	loading: boolean;
+	revalidate: () => Promise<void>;
+	logout: () => void;
 }
 
 const defaultState: AuthState = {
-	authed: false,
-	user: undefined,
-	verifyAuth: async () => { },
-	loading: true
+	user: null,
+	loading: true,
+	revalidate: async () => {},
+	logout: () => {}
 };
 
 const AppContext = createContext<AuthState>(defaultState);
-export const useAuthentication = () => {
-	return useContext(AppContext);
-};
+export const useAuthentication = () => useContext(AppContext);
+
+type AuthenticatedUser = {
+	id: string;
+	username: string;
+	flags: number;
+	email: string;
+	settings: {
+		displayName: string;
+		color: string;
+	}
+}
 
 export function AuthenticationProvider({ children }: any) {
-	const [authed, setAuthed] = useState(false);
+	const [user, setUser] = useState<AuthenticatedUser | null>(null);
 	const [loading, setLoading] = useState(true);
-	const [id, setUid] = useState<string | undefined>();
-	const [username, setUsername] = useState<string | undefined>();
-	const [displayname, setDisplayname] = useState<string | undefined>();
-	const [flags, setFlags] = useState<number>(0);
-	const [email, setEmail] = useState<string | undefined>();
 
-	const verifyAuth = async () => {
-		try {
-			const result = await fetch("/api/auth");
-			if (result == null || result.status !== HttpStatusCode.OK) {
-				throw new Error("Failed Authentication");
+	useEffect(() => {
+		(async () => {
+			try {
+				await revalidate();
+				setLoading(false);
+			} catch (_) {
+				destroyCookie(null, "discourse-session");
+				setLoading(false);
 			}
+		})()
+	}, []);
 
-			const data = await result.json();
-			setUid(data.id);
-			setUsername(data.username);
-			setDisplayname(data.displayname);
-			setFlags(data.flags);
-			setEmail(data.email);
-			setAuthed(true);
-		} catch {
-			setAuthed(false);
+	const revalidate = async () => {
+		const response = await fetch("/api/auth");
+		if (response.status === HttpStatusCode.OK) {
+			const user = await response.json();
+			setUser(user);
+		} else {
+			setUser(null);
+			throw new Error("Unauthorized");
 		}
 	}
 
-	useEffect(() => {
-		verifyAuth().then(() => {
-			setLoading(false);
-		}).catch(() => {
-			setLoading(false);
-		});
-	}, []);
-
-	const value: AuthState = {
-		authed,
-		user: {
-			id: id as string,
-			email: email as string,
-			displayname: displayname as string,
-			username: username as string,
-			flags
-		},
-		verifyAuth,
-		loading
+	const logout = () => {
+		destroyCookie(null, "discourse-session");
+		setUser(null);
 	}
 
 	return (
-		<AppContext.Provider value={value}>
+		<AppContext.Provider value={{
+			user,
+			loading,
+			revalidate,
+			logout
+		}}>
 			{children}
 		</AppContext.Provider>
 	)

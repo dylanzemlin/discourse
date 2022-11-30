@@ -33,7 +33,8 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 			email: user.email,
 			displayname: user.settings.displayName,
 			username: user.username,
-			flags: user.flags
+			flags: user.flags,
+			color: user.settings.color
 		}
 		await req.session.save();
 		return res.status(HttpStatusCode.OK).json({
@@ -78,7 +79,8 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 			flags: DiscouseUserFlags.None,
 			settings: {
 				displayName: displayname ?? username,
-				theme: "dark"
+				theme: "dark",
+				color: "#22A39F"
 			}
 		});
 
@@ -87,7 +89,8 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 			email: user.email,
 			displayname: user.settings.displayName,
 			username: user.username,
-			flags: user.flags
+			flags: user.flags,
+			color: user.settings.color
 		}
 
 		await req.session.save();

@@ -1,4 +1,4 @@
-import { Button, FileInput, Flex, LoadingOverlay, Modal, Select, TextInput, Title } from "@mantine/core";
+import { Button, ColorInput, FileInput, Flex, LoadingOverlay, Modal, Select, TextInput, Title } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
 import { useLocalStorage } from "@mantine/hooks";
 import { FileUpload } from "tabler-icons-react";
@@ -18,10 +18,11 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
     runImmediate: false
   });
 
-  const [theme, setBrowserTheme] = useLocalStorage<"light" | "dark">({ key: "discourse-theme", defaultValue: "dark" });
   const [displayname, setDisplayname] = useState<string>("John Doe");
   const [email, setEmail] = useState<string>("john.doe@gmail.com");
+  const [color, setColor] = useState<string>("#22A39F");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [saving, setSaving] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -29,17 +30,18 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
       return;
     }
 
-    setAvatarFile(null);
     refetch();
   }, [props.opened, refetch]);
 
   useEffect(() => {
-    if (data == undefined) {
+    if (data == null) {
       return;
     }
 
     setDisplayname(data.settings.displayName);
     setEmail(data.email);
+    setColor(data.settings.color ?? "#22A39F");
+    setAvatarFile(null);
   }, [data]);
 
   const uploadAvatar = async (avatar: File | null) => {
@@ -47,6 +49,7 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
       return;
     }
 
+    setSaving(true);
     const formData = new FormData();
     formData.append("file", avatar);
 
@@ -54,6 +57,7 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
       method: "PATCH",
       body: formData
     });
+    setSaving(false);
 
     if (result.ok) {
       return showNotification({
@@ -70,15 +74,19 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
 
   const save = async () => {
     // Save displayname and theme
+    setSaving(true);
     const result = await fetch("/api/v1/user/settings", {
       method: "PATCH",
       body: JSON.stringify({
-        name: displayname,
-        theme: theme
+        displayName: displayname,
+        theme: "dark",
+        color
       })
     });
+    setSaving(false);
 
     if (result.ok) {
+      refetch();
       return showNotification({
         title: "Settings Updated",
         message: "Successfully updated your settings"
@@ -93,9 +101,11 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
 
   const deleteAccount = async () => {
     // TODO: Show confirmation modal
+    setSaving(true);
     const result = await fetch("/api/v1/user", {
       method: "DELETE"
     });
+    setSaving(true);
 
     if (result.ok) {
       return router.push("/");
@@ -108,8 +118,11 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
   }
 
   return (
-    <Modal closeOnClickOutside={false} size="lg" opened={props.opened} onClose={props.onClose} centered withCloseButton={false}>
-      <LoadingOverlay visible={loading} />
+    <Modal size="lg" opened={props.opened} onClose={() => {
+      setAvatarFile(null);
+      props.onClose();
+    }} centered withCloseButton={false}>
+      <LoadingOverlay visible={loading || saving} />
 
       <Flex w="100%" align="center" justify="center" gap="lg">
         <div style={{
@@ -131,7 +144,7 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
         <TextInput
           placeholder="john_doe"
           label="Username"
-          value={data?.username}
+          value={data?.username ?? "john_doe"}
           disabled
         />
 
@@ -162,7 +175,14 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
           w="100%"
         />
 
-        <Select
+        <ColorInput
+          label="Color"
+          placeholder="#22A39F"
+          value={color}
+          onChange={(e) => setColor(e)}
+        />
+
+        {/* <Select
           label="Theme"
           placeholder="Dark"
           data={[
@@ -170,13 +190,14 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
             { value: "light", label: "Light" }
           ]}
           value={theme}
+          disabled
           onChange={(e) => {
             setBrowserTheme((e as any) ?? "dark");
           }}
-        />
+        /> */}
 
         <Flex gap="lg" w="100%" justify="center">
-          <Button w="25%" mt="lg" disabled={!(email != data?.email || displayname != data?.settings?.name || theme != data?.settings?.theme)} onClick={save}>
+          <Button w="25%" mt="lg" disabled={!(email != data?.email || displayname != data?.settings?.name || color != data?.settings?.color)} onClick={save}>
             Save
           </Button>
           <Button w="25%" mt="lg" onClick={props.onClose} color="gray">

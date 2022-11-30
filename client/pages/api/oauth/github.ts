@@ -88,7 +88,8 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 			flags: DiscouseUserFlags.None,
 			settings: {
 				displayName: name ?? login,
-				theme: "dark"
+				theme: "dark",
+				color: "#22A39F"
 			}
 		});
 
@@ -114,7 +115,8 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		email: user.email,
 		displayname: user.settings.displayName,
 		username: user.username,
-		flags: user.flags
+		flags: user.flags,
+		color: user.settings.color
 	}
 	await req.session.save();
 

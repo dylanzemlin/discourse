@@ -66,20 +66,21 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
       flags: DiscouseUserFlags.None,
       settings: {
         displayName: given_name ?? name,
-        theme: "dark"
+        theme: "dark",
+        color: "#22A39F"
       }
     });
 
     const avatar_result = await fetch(picture);
     if (avatar_result.ok) {
-      if(!existsSync("./tmp")) {
+      if (!existsSync("./tmp")) {
         mkdirSync("./tmp");
       }
 
       appendFileSync(`./tmp/${user.id}.png`, Buffer.from(await avatar_result.arrayBuffer()));
 
       const form = new FormData();
-      form.append("file", createReadStream(`./tmp/${user.id}.png`)); 
+      form.append("file", createReadStream(`./tmp/${user.id}.png`));
       form.append("uid", user.id);
 
       await pb.collection("avatars").create(form);
@@ -92,7 +93,8 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
     email: user.email,
     displayname: user.settings.displayName,
     username: user.username,
-    flags: user.flags
+    flags: user.flags,
+    color: user.settings.color
   }
   await req.session.save();
 

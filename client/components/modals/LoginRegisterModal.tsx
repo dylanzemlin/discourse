@@ -1,12 +1,11 @@
 import { Anchor, Button, Checkbox, Divider, Flex, Modal, PasswordInput, Tabs, TextInput, Title, Text } from "@mantine/core";
+import { BrandGithub, BrandGoogle } from "tabler-icons-react";
+import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import HttpStatusCode from "@lib/api/HttpStatusCode";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import v1 from "@lib/api/v1";
-import { BrandGithub, BrandGoogle } from "tabler-icons-react";
-import { useAuthentication } from "@lib/context/auth";
 
 const github_params = new URLSearchParams({
   client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID as string,
@@ -282,19 +281,6 @@ export default function LoginRegisterModal() {
   const [opened, handler] = useDisclosure(false);
   const [loading, setLoading] = useState(false);
   const isMobile = useMediaQuery("(max-width: 768px)");
-  
-  // Auto Redirection
-  const auth = useAuthentication();
-  const router = useRouter();
-
-  const onOpen = () => {
-    if(auth.authed) {
-      router.push("/chaos");
-      return;
-    }
-
-    handler.open();
-  }
 
   return (
     <>
@@ -325,7 +311,7 @@ export default function LoginRegisterModal() {
           </Tabs.Panel>
         </Tabs>
       </Modal>
-      <Button onClick={onOpen} w={`${isMobile ? 125 : 200}px`} h="50px" color="violet" style={{
+      <Button onClick={handler.open} w={`${isMobile ? 125 : 200}px`} h="50px" color="violet" style={{
         fontSize: "1.5rem"
       }}>Login</Button>
     </>

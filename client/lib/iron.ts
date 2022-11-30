@@ -10,6 +10,7 @@ declare module "iron-session" {
 			email: string;
 			username: string;
 			flags: DiscouseUserFlags;
+			color: string;
 		};
 	}
 }

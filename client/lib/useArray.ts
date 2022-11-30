@@ -15,10 +15,24 @@ export default function useArray<T>(defaultValue?: T[]) {
     setArray([]);
   }, []);
 
+  const length = useCallback(() => {
+    return array.length;
+  }, [array]);
+
+  const removeAt = useCallback((index: number) => {
+    setArray((prev: T[]) => {
+      const arr = [...prev];
+      arr.splice(index, 1);
+      return arr;
+    });
+  }, []);
+
   return {
     array,
     push,
     remove,
     clear,
+    length,
+    removeAt
   };
 }

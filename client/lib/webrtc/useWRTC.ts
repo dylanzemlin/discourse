@@ -1,9 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { useCallback, useEffect, useState } from "react";
 import { useAuthentication } from "../context/auth";
 import { useMediaQuery } from "@mantine/hooks";
 import useDict from "../useDict";
 import Peer from "simple-peer";
+import useArray from "@lib/useArray";
+import { showNotification } from "@mantine/notifications";
 
 const iceConfig: RTCConfiguration = {
   iceServers: [
@@ -84,7 +87,21 @@ type PeerState = {
 
 export default function useWRTC() {
   // Websocket Stream/Connection
-  const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {});
+  const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {
+    reconnectAttempts: 25,
+    reconnectInterval: 3000,
+    retryOnError: true,
+    onReconnectStop: () => {
+      showNotification({
+        title: "Server Lost",
+        message: "There was an error connecting to the server. Please try again later.",
+        color: "red"
+      });
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 5000);
+    }
+  });
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
@@ -105,6 +122,9 @@ export default function useWRTC() {
   // Mobile Detection
   const isMobile = useMediaQuery("(max-width: 768px)");
 
+  // Chat
+  const messages = useArray<any>();
+
   const send = useCallback((type: PackageType, data: any) => {
     const str = JSON.stringify({
       type,
@@ -113,6 +133,14 @@ export default function useWRTC() {
     console.log("[send] sending: " + str);
     sendMessage(str);
   }, [sendMessage]);
+
+  const sendChat = (message: string) => {
+    send(PackageType.SEND_CHAT, {
+      message,
+      name: localState.name,
+      color: auth.user?.settings.color
+    });
+  }
 
   const reset = useCallback(() => {
     peers.values().forEach((peer) => {
@@ -128,7 +156,7 @@ export default function useWRTC() {
     streams.clear();
     setIsConnected(false);
     setLocalStream(null);
-  }, [peers, streams]);
+  }, []);
 
   const handleJoin = (uid: string, initiator: boolean) => {
     console.log("handleJoin 1");
@@ -171,6 +199,7 @@ export default function useWRTC() {
 
   // Triggered on every message received
   useEffect(() => {
+    console.log(1);
     (async () => {
       if (lastMessage == null) {
         return;
@@ -220,6 +249,14 @@ export default function useWRTC() {
         }
 
         case PackageType.SEND_CHAT: {
+          messages.push(packet);
+        } break;
+
+        case PackageType.INIT: {
+          const history = packet.chatHistory;
+          for(const idx in history) {
+            messages.push(history[idx]);
+          }
         } break;
       }
     })();
@@ -228,8 +265,7 @@ export default function useWRTC() {
   // Triggered on every connection state change
   useEffect(() => {
     if (readyState === ReadyState.CLOSED) {
-      reset();
-      setIsConnected(false);
+      return reset();
     }
 
     if (readyState !== ReadyState.OPEN) {
@@ -240,12 +276,13 @@ export default function useWRTC() {
   }, [readyState, reset]);
 
   useEffect(() => {
+    console.log(3);
     if (!isConnected) {
       return;
     }
 
     (async () => {
-      if(isMobile) {
+      if (isMobile) {
         constraints.video.width = 320;
         constraints.video.height = 240;
       }
@@ -314,6 +351,8 @@ export default function useWRTC() {
     localState,
     peerStates,
     streams,
-    localStream
+    localStream,
+    sendChat,
+    messages
   }
 }

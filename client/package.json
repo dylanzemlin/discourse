@@ -47,6 +47,7 @@
   "formidable": "^2.0.1",
   "iron-session": "^6.3.1",
   "next": "13.0.2",
+  "nookies": "^2.5.2",
   "pocketbase": "^0.8.1",
   "react": "18.2.0",
   "react-dom": "18.2.0",

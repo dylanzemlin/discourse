@@ -8,6 +8,8 @@ import { useEffect, useRef } from "react";
 import useWRTC from "@lib/webrtc/useWRTC";
 import Image from "next/image";
 import Head from "next/head";
+import ChatModal from "@modals/ChatModal";
+import useArray from "@lib/useArray";
 
 type VideoProps = {
 	stream: MediaStream | null;
@@ -161,17 +163,24 @@ export default function Chaos() {
 							cursor: "pointer"
 						}
 					}} onClick={settingsHandler.open}>
-						<Image unoptimized src="/api/avatar" alt={`${auth.user?.displayname}'s Avatar`} width={isMobile ? 48 : 64} height={isMobile ? 48 : 64} style={{
+						<Image unoptimized src="/api/avatar" alt={`${auth.user?.settings.displayName}'s Avatar`} width={isMobile ? 48 : 64} height={isMobile ? 48 : 64} style={{
 							borderRadius: "50%"
 						}} />
 						<Title order={isMobile ? 4 : 2}>
-							{auth.user?.displayname}
+							{auth.user?.settings.displayName}
 						</Title>
 					</Group>
 					<div style={{
 						flexGrow: 1,
 						height: "3px",
-						backgroundColor: "#fff",
+						backgroundImage: "linear-gradient(to right, var(--discourse-primary), var(--discourse-secondary))",
+						marginRight: "1rem",
+					}} />
+					<ChatModal messages={wrtc.messages.array} sendChat={wrtc.sendChat} />
+					<div style={{
+						height: "3px",
+						width: "50px",
+						backgroundColor: "var(--discourse-secondary)",
 						marginRight: "1rem"
 					}} />
 					<ActionMenu isMobile={isMobile} toggleDeafened={wrtc.toggleDeafened} toggleMuted={wrtc.toggleMuted} toggleVideo={wrtc.toggleVideo} localState={wrtc.localState} />

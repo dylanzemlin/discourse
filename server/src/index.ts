@@ -8,7 +8,9 @@ dotenv.config();
 const filter = new Filter();
 let chatHistory: {
 	uid: string;
-	message: string;
+	content: string;
+	author: string;
+	color: string;
 }[] = [];
 let lastChat = Date.now();
 let lastChats: Record<string, number> = {};
@@ -182,7 +184,9 @@ wss.on("connection", async (localSocket, req) => {
 				const message = filter.clean(json.message);
 				chatHistory.push({
 					uid: localSocket.id,
-					message
+					content: message,
+					color: json.color,
+					author: json.name
 				});
 
 				// Ensure the history has at most 50 messages
@@ -193,9 +197,10 @@ wss.on("connection", async (localSocket, req) => {
 				// Send the cleaned message to all clients
 				broadcast({
 					type: PackageType.SEND_CHAT,
-					message: message,
+					content: message,
 					uid: localSocket.id,
-					name: json.name
+					author: json.name,
+					color: json.color
 				});
 			} break;
 		}
