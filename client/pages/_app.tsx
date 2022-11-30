@@ -1,5 +1,6 @@
 import { NotificationsProvider } from '@mantine/notifications';
 import { AuthenticationProvider } from '../lib/context/auth';
+import { useLocalStorage } from '@mantine/hooks';
 import { MantineProvider } from '@mantine/core';
 import { AppProps } from 'next/app';
 import Head from 'next/head';
@@ -7,6 +8,7 @@ import "../styles/globals.css";
 
 export default function App(props: AppProps) {
 	const { Component, pageProps } = props;
+	const [ theme ] = useLocalStorage<"light" | "dark">({ key: "discourse-theme", defaultValue: "dark" });
 
 	return (
 		<>
@@ -19,7 +21,7 @@ export default function App(props: AppProps) {
 				withGlobalStyles
 				withNormalizeCSS
 				theme={{
-					colorScheme: 'dark',
+					colorScheme: theme,
 				}}
 			>
 				<NotificationsProvider

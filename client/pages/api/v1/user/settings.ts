@@ -5,7 +5,7 @@ import pocket from "../../../../lib/pocket";
 
 async function getUserSettings(req: NextApiRequest, res: NextApiResponse) {
   const pb = await pocket();
-  let user;
+  let user: any | undefined = undefined;
   try {
     user = await pb.collection("users").getFirstListItem<any>(`id = "${req.session.user?.id}"`);
   } catch (e) {
@@ -15,8 +15,12 @@ async function getUserSettings(req: NextApiRequest, res: NextApiResponse) {
     });
   }
 
+  // Remove the following keys from user
+  const keys = ["auth_email_hash", "auth_email_salt", "collectionId", "collectionName", "updated", "expand", "auth_type"];
+  keys.forEach(key => delete user?.[key]);
+
   return res.status(HttpStatusCode.OK).json({
-    ...(user.settings)
+    ...(user)
   });
 }
 

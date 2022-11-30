@@ -96,7 +96,7 @@ export default function RegisterModal() {
 				onClose={handler.close}
 				title={<Title order={2}>Register</Title>}
 				centered
-				closeOnClickOutside={!loading}
+				closeOnClickOutside={false}
 				closeOnEscape={!loading}
 				withCloseButton={!loading}
 			>

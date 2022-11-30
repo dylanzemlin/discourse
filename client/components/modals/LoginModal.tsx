@@ -53,7 +53,7 @@ export default function LoginModal() {
 				onClose={handler.close}
 				title={<Title order={2}>Login</Title>}
 				centered
-				closeOnClickOutside={!loading}
+				closeOnClickOutside={false}
 				closeOnEscape={!loading}
 				withCloseButton={!loading}
 			>
