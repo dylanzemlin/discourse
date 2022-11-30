@@ -29,6 +29,8 @@ export default function Home() {
 				backgroundRepeat: "no-repeat",
 				backgroundSize: "cover",
 				filter: "blur(10px)",
+				WebkitFilter: "blur(10px)",
+				msFilter: "blur(10px)",
 				width: "100%",
 				height: "100vh"
 			}} />
