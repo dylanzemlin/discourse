@@ -40,7 +40,7 @@ export default function Home() {
 				<Title align="center" order={isMobile ? 5 : 3}>A video, voice, and chat platform to connect with people all across the world in one central room.</Title>
 
 				<Flex mt="xl" gap="xl" hidden={auth.loading}>
-					{!auth.user ? (
+					{(!auth.user || auth.loading) ? (
 						<LoginRegisterModal />
 					) : (
 						<>
