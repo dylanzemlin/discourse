@@ -4,6 +4,7 @@ import { FileUpload } from "tabler-icons-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import useApi from "@lib/useApi";
+import { useAuthentication } from "@lib/context/auth";
 
 type UserSettingsModalProps = {
   opened: boolean;
@@ -23,6 +24,7 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
   const [color, setColor] = useState<string>("#22A39F");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
+  const auth = useAuthentication();
   const router = useRouter();
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
 
     if (result.ok) {
       refetch();
+      await auth.revalidate(); // update auth context :)
       return showNotification({
         title: "Settings Updated",
         message: "Successfully updated your settings"

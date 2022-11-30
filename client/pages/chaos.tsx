@@ -10,6 +10,7 @@ import Image from "next/image";
 import Head from "next/head";
 import ChatModal from "@modals/ChatModal";
 import useArray from "@lib/useArray";
+import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 
 type VideoProps = {
 	stream: MediaStream | null;
@@ -165,7 +166,8 @@ export default function Chaos() {
 						}
 					}} onClick={settingsHandler.open}>
 						<Image unoptimized src={avatar} alt={`${auth.user?.settings.displayName}'s Avatar`} width={isMobile ? 48 : 64} height={isMobile ? 48 : 64} style={{
-							borderRadius: "50%"
+							borderRadius: "50%",
+							border: auth.hasFlag(DiscouseUserFlags.Admin) ? "2px solid #B33A3A" : "2px solid var(--discourse-primary)"
 						}} />
 						<Title order={isMobile ? 4 : 2}>
 							{auth.user?.settings.displayName}

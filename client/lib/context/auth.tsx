@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
+import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import HttpStatusCode from "../api/HttpStatusCode";
 import { destroyCookie } from "nookies";
 
@@ -7,13 +8,15 @@ export type AuthState = {
 	loading: boolean;
 	revalidate: () => Promise<void>;
 	logout: () => void;
+	hasFlag: (flag: DiscouseUserFlags) => boolean;
 }
 
 const defaultState: AuthState = {
 	user: null,
 	loading: true,
 	revalidate: async () => {},
-	logout: () => {}
+	logout: () => {},
+	hasFlag: (flag: DiscouseUserFlags) => false
 };
 
 const AppContext = createContext<AuthState>(defaultState);
@@ -62,12 +65,21 @@ export function AuthenticationProvider({ children }: any) {
 		setUser(null);
 	}
 
+	const hasFlag = (flag: DiscouseUserFlags) => {
+		if (user == null) {
+			return false;
+		}
+
+		return (user.flags & flag) === flag;
+	}
+
 	return (
 		<AppContext.Provider value={{
 			user,
 			loading,
 			revalidate,
-			logout
+			logout,
+			hasFlag
 		}}>
 			{children}
 		</AppContext.Provider>
