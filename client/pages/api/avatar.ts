@@ -16,7 +16,7 @@ async function getAvatar(req: NextApiRequest, res: NextApiResponse) {
     return res.status(HttpStatusCode.UNAUTHORIZED).end();
   }
 
-  const avatar = getSavedAvatar(req.session.user?.id ?? req.query.uid as string);
+  const avatar = getSavedAvatar(req.query.uid as string ?? req.session.user?.id);
   res.setHeader("Content-Type", "image/png");
   res.status(HttpStatusCode.OK).send(avatar);
 }
