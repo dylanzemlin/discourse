@@ -4,7 +4,7 @@ import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import UserSettingsModal from "@modals/UserSettingsModal";
 import MediaDeviceQuery from "@queries/MediaDeviceQuery";
 import { useAuthentication } from "@lib/context/auth";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import useWRTC from "@lib/webrtc/useWRTC";
 import Image from "next/image";
 import Head from "next/head";
@@ -115,6 +115,7 @@ export default function Chaos() {
 	// Handle all the WebRTC stuff
 	const [showSettings, settingsHandler] = useDisclosure(false);
 	const isMobile = useMediaQuery("(max-width: 768px)");
+	const [avatar, setAvatar] = useState("/api/avatar");
 	const auth = useAuthentication();
 	const wrtc = useWRTC();
 
@@ -163,7 +164,7 @@ export default function Chaos() {
 							cursor: "pointer"
 						}
 					}} onClick={settingsHandler.open}>
-						<Image unoptimized src="/api/avatar" alt={`${auth.user?.settings.displayName}'s Avatar`} width={isMobile ? 48 : 64} height={isMobile ? 48 : 64} style={{
+						<Image unoptimized src={avatar} alt={`${auth.user?.settings.displayName}'s Avatar`} width={isMobile ? 48 : 64} height={isMobile ? 48 : 64} style={{
 							borderRadius: "50%"
 						}} />
 						<Title order={isMobile ? 4 : 2}>
@@ -186,7 +187,9 @@ export default function Chaos() {
 					<ActionMenu isMobile={isMobile} toggleDeafened={wrtc.toggleDeafened} toggleMuted={wrtc.toggleMuted} toggleVideo={wrtc.toggleVideo} localState={wrtc.localState} />
 				</Flex>
 			</Flex>
-			<UserSettingsModal opened={showSettings} onClose={settingsHandler.close} />
+			<UserSettingsModal onAvatarChanged={() => {
+				setAvatar("/api/avatar?random=" + Date.now());
+			}} opened={showSettings} onClose={settingsHandler.close} />
 		</MediaDeviceQuery>
 	)
 }

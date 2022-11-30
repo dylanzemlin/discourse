@@ -1,6 +1,5 @@
-import { Button, ColorInput, FileInput, Flex, LoadingOverlay, Modal, Select, TextInput, Title } from "@mantine/core";
+import { Button, ColorInput, FileInput, Flex, LoadingOverlay, Modal, TextInput, Title } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
-import { useLocalStorage } from "@mantine/hooks";
 import { FileUpload } from "tabler-icons-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
@@ -9,6 +8,7 @@ import useApi from "@lib/useApi";
 type UserSettingsModalProps = {
   opened: boolean;
   onClose: () => void;
+  onAvatarChanged: () => void;
 }
 
 export default function UserSettingsModal(props: UserSettingsModalProps) {
@@ -60,6 +60,7 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
     setSaving(false);
 
     if (result.ok) {
+      props.onAvatarChanged();
       return showNotification({
         title: "Avatar Updated",
         message: `Successfully updated your avatar to ${avatar.name}`
