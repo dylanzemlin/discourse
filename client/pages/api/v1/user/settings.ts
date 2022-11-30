@@ -14,19 +14,39 @@ async function getUserSettings(req: NextApiRequest, res: NextApiResponse) {
       error_text: "UNAUTHORIZED"
     });
   }
-  
+
   return res.status(HttpStatusCode.OK).json({
     ...(user.settings)
   });
 }
 
 async function updateUserSettings(req: NextApiRequest, res: NextApiResponse) {
+  const pb = await pocket();
+  let user;
+  try {
+    user = await pb.collection("users").getFirstListItem<any>(`id = "${req.session.user?.id}"`);
+  } catch (e) {
+    return res.status(HttpStatusCode.UNAUTHORIZED).json({
+      error_code: HttpStatusCode.UNAUTHORIZED,
+      error_text: "UNAUTHORIZED"
+    });
+  }
+
+  const settings = req.body;
+  // TODO: Verify settings does not contain weird stuff
+  await pb.collection("users").update(user.id, {
+    settings: settings
+  });
+
+  return res.status(HttpStatusCode.OK).json({
+    ...(settings)
+  });
 }
 
 export default withSessionRoute(function UserSettingsRoute(req: NextApiRequest, res: NextApiResponse) {
   const { method } = req;
 
-  if(req.session?.user == null) {
+  if (req.session?.user == null) {
     res.status(HttpStatusCode.UNAUTHORIZED).json({
       error_code: HttpStatusCode.UNAUTHORIZED,
       error_text: "UNAUTHORIZED"
@@ -37,7 +57,7 @@ export default withSessionRoute(function UserSettingsRoute(req: NextApiRequest, 
   switch (method) {
     case 'GET':
       return getUserSettings(req, res);
-    case 'PUT':
+    case 'PATCH':
       return updateUserSettings(req, res);
     default:
       return res.status(HttpStatusCode.METHOD_NOT_ALLOWED).json({
