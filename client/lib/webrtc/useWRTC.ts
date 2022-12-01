@@ -7,6 +7,7 @@ import useDict from "../useDict";
 import Peer from "simple-peer";
 import useArray from "@lib/useArray";
 import { showNotification } from "@mantine/notifications";
+import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 
 const iceConfig: RTCConfiguration = {
   iceServers: [
@@ -56,6 +57,14 @@ export enum PackageType {
   // [Server -> Client] Used to broadcast a new chat message to all clients
   // [Client -> Server] Used to send a new chat message to the server
   SEND_CHAT,
+
+  // [Server -> Client] Used to broadcast that a message should be deleted
+  // [Client -> Server] Tells the server to delete a chat message
+  DELETE_CHAT,
+
+  // [Server -> Client] Used to broadcast that the chat history should be cleared
+  // [Client -> Server] Tells the server to delete the chat history
+  CLEAR_CHAT,
 
   // [Client -> Server] Send to the server 
   INIT,
@@ -140,6 +149,26 @@ export default function useWRTC() {
       name: localState.name,
       color: auth.user?.settings.color
     });
+  }
+
+  const deleteChat = (id: string) => {
+    // Client side auth :)
+    if(!auth.hasFlag(DiscouseUserFlags.Admin)) {
+      return;
+    }
+
+    send(PackageType.DELETE_CHAT, {
+      id
+    });
+  }
+
+  const clearChat = () => {
+    // Client side auth :)
+    if(!auth.hasFlag(DiscouseUserFlags.Admin)) {
+      return;
+    }
+
+    send(PackageType.CLEAR_CHAT, {});
   }
 
   const reset = useCallback(() => {
@@ -252,9 +281,21 @@ export default function useWRTC() {
           messages.push(packet);
         } break;
 
+        case PackageType.CLEAR_CHAT: {
+          messages.clear();
+        } break;
+
+        case PackageType.DELETE_CHAT: {
+          const values = messages.array;
+          const idx = values.findIndex(x => x.id === packet.id);
+          if (idx !== -1) {
+            messages.removeAt(idx);
+          }
+        } break;
+
         case PackageType.INIT: {
           const history = packet.chatHistory;
-          for(const idx in history) {
+          for (const idx in history) {
             messages.push(history[idx]);
           }
         } break;
@@ -353,6 +394,8 @@ export default function useWRTC() {
     streams,
     localStream,
     sendChat,
+    deleteChat,
+    clearChat,
     messages
   }
 }

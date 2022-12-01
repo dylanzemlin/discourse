@@ -179,7 +179,7 @@ export default function Chaos() {
 						backgroundImage: "linear-gradient(to right, var(--discourse-primary), var(--discourse-secondary))",
 						marginRight: "1rem",
 					}} />
-					<ChatModal messages={wrtc.messages.array} sendChat={wrtc.sendChat} />
+					<ChatModal messages={wrtc.messages.array} sendChat={wrtc.sendChat} deleteChat={wrtc.deleteChat} clearChat={wrtc.clearChat} />
 					<div style={{
 						height: "3px",
 						width: "50px",

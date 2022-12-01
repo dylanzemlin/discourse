@@ -3,6 +3,7 @@ import Filter from "bad-words";
 import ws from "ws";
 
 import dotenv from "dotenv";
+import { v4 } from "uuid";
 dotenv.config();
 
 const filter = new Filter();
@@ -11,6 +12,8 @@ let chatHistory: {
 	content: string;
 	author: string;
 	color: string;
+	id: string;
+	time: string;
 }[] = [];
 let lastChat = Date.now();
 let lastChats: Record<string, number> = {};
@@ -23,6 +26,14 @@ export enum PackageType {
   // [Server -> Client] Used to broadcast a new chat message to all clients
   // [Client -> Server] Used to send a new chat message to the server
   SEND_CHAT,
+
+  // [Server -> Client] Used to broadcast that a message should be deleted
+  // [Client -> Server] Tells the server to delete a chat message
+	DELETE_CHAT,
+
+	// [Server -> Client] Used to broadcast that the chat history should be cleared
+  // [Client -> Server] Tells the server to delete the chat history
+	CLEAR_CHAT,
   
   // [Client -> Server] Send to the server 
   INIT,
@@ -159,6 +170,23 @@ wss.on("connection", async (localSocket, req) => {
 				}));
 			} break;
 
+			case PackageType.DELETE_CHAT: {
+				// Technically we should do some server side authentication here, but it'll be okay
+				chatHistory = chatHistory.filter((chat) => chat.id !== json.id);
+				broadcast({
+					type: PackageType.DELETE_CHAT,
+					id: json.id
+				});
+			} break;
+
+			case PackageType.CLEAR_CHAT: {
+				// Technically we should do some server side authentication here, but it'll be okay
+				chatHistory = [];
+				broadcast({
+					type: PackageType.CLEAR_CHAT
+				});
+			} break;
+
 			case PackageType.SEND_CHAT: {
 				if (localSocket.id == null) {
 					return;
@@ -182,11 +210,14 @@ wss.on("connection", async (localSocket, req) => {
 
 				// Clean the message and push it to the history
 				const message = filter.clean(json.message);
+				const id = v4();
 				chatHistory.push({
 					uid: localSocket.id,
 					content: message,
 					color: json.color,
-					author: json.name
+					author: json.name,
+					id,
+					time: new Date().toLocaleTimeString()
 				});
 
 				// Ensure the history has at most 50 messages
@@ -200,7 +231,9 @@ wss.on("connection", async (localSocket, req) => {
 					content: message,
 					uid: localSocket.id,
 					author: json.name,
-					color: json.color
+					color: json.color,
+					id,
+					time: new Date().toLocaleTimeString()
 				});
 			} break;
 		}
