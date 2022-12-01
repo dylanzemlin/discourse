@@ -12,6 +12,14 @@
 
 All members contributed to their respective fields regardless of what is shown in the commit history. For the majority of the project the team worked together on Dylan's computer, hence the commits being under his name.
 
+## Requirements
+
+Below are the requirements and the versions we ran our tests on. We cannot guarantee that the application will work on other versions.
+
+  - [NodeJS](https://nodejs.org/en/) v19.2.0
+  - [NPM](https://www.npmjs.com/) v9.1.3
+  - [Yarn](https://yarnpkg.com/) v3.3.0
+
 ## Running
 
 First start by following the instructions in the [environment.md](./docs/environment.md) file to set up your local environment.

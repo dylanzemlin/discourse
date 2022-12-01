@@ -1,7 +1,6 @@
 {
  "name": "discourse-client",
  "version": "1.0.0",
- "private": false,
  "author": "Discourse",
  "description": "A video, voice, and chat platform to connect with people all across the world in one central room.",
  "homepage": "https://discourse.dylanzeml.in/",
