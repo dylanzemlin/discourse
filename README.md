@@ -18,7 +18,7 @@ Below are the requirements and the versions we ran our tests on. We cannot guara
 
   - [NodeJS](https://nodejs.org/en/) v19.2.0
   - [NPM](https://www.npmjs.com/) v9.1.3
-  - [Yarn](https://yarnpkg.com/) v3.3.0
+  - [Yarn](https://classic.yarnpkg.com/) v1.22.19
 
 ## Running
 
