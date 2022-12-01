@@ -1,0 +1,18 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "commonjs",
+		"strict": true,
+		"declaration": false,
+		"outDir": "./dist",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"typeRoots": ["./node_modules/@types", "./global.d.ts"]
+	},
+	"exclude": [
+		"tests",
+		"lib",
+		"node_modules"
+	]
+}
