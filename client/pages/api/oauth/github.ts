@@ -1,14 +1,18 @@
-import { existsSync, mkdirSync, appendFileSync, unlinkSync, createReadStream } from "fs";
 import { DiscourseErrorCode } from "@lib/api/DiscourseErrorCode";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
+import { existsSync, mkdirSync, appendFileSync } from "fs";
 import { NextApiRequest, NextApiResponse } from "next";
 import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { withSessionRoute } from "@lib/iron";
 import pocket from "@lib/pocket";
-import FormData from "form-data";
 import fetch from "node-fetch";
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
+	if(!process.env.NEXT_PUBLIC_AUTH_GITHUB_ENABLED || process.env[`GITHUB_CLIENT_SECRET_${process.env.NODE_ENV.toUpperCase()}`] == null) {
+		res.status(HttpStatusCode.NOT_FOUND).end();
+		return;
+	}
+
 	const pb = await pocket();
 	const { code } = req.query;
 
@@ -86,7 +90,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 			email,
 			username: login,
 			auth_type: "github",
-			flags: DiscouseUserFlags.None,
+			flags: DiscouseUserFlags.None.valueOf(),
 			settings: {
 				displayName: name ?? login,
 				theme: "dark",

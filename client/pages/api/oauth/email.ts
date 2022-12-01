@@ -76,7 +76,7 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 			auth_type: "password",
 			auth_email_hash: hash,
 			auth_email_salt: salt,
-			flags: DiscouseUserFlags.None,
+			flags: DiscouseUserFlags.None.valueOf(),
 			settings: {
 				displayName: displayname ?? username,
 				theme: "dark",

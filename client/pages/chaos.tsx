@@ -1,16 +1,16 @@
 import { ActionIcon, Button, Flex, Group, LoadingOverlay, Menu, Title } from "@mantine/core";
 import { Headphones, Microphone, Camera, Menu2 as MenuIcon } from "tabler-icons-react";
+import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import UserSettingsModal from "@modals/UserSettingsModal";
 import MediaDeviceQuery from "@queries/MediaDeviceQuery";
 import { useAuthentication } from "@lib/context/auth";
 import { useEffect, useRef, useState } from "react";
 import useWRTC from "@lib/webrtc/useWRTC";
+import ChatModal from "@modals/ChatModal";
 import Image from "next/image";
 import Head from "next/head";
-import ChatModal from "@modals/ChatModal";
-import useArray from "@lib/useArray";
-import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
+import { useRouter } from "next/router";
 
 type VideoProps = {
 	stream: MediaStream | null;
@@ -118,7 +118,13 @@ export default function Chaos() {
 	const isMobile = useMediaQuery("(max-width: 768px)");
 	const [avatar, setAvatar] = useState("/api/avatar");
 	const auth = useAuthentication();
+	const router = useRouter();
 	const wrtc = useWRTC();
+
+	if (auth.user == null && !auth.loading) {
+		router.push("/");
+		return;
+	}
 
 	if (!wrtc.isConnected || auth.user == null) {
 		return (

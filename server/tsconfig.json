@@ -6,7 +6,9 @@
 		"declaration": false,
 		"outDir": "./dist",
 		"esModuleInterop": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"typeRoots": ["./node_modules/@types", "./global.d.ts"]
 	},
 	"exclude": [
 		"tests",

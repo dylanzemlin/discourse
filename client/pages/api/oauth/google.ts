@@ -1,6 +1,6 @@
-import { existsSync, mkdirSync, appendFileSync } from "fs";
 import { DiscourseErrorCode } from "@lib/api/DiscourseErrorCode";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
+import { existsSync, mkdirSync, appendFileSync } from "fs";
 import { NextApiRequest, NextApiResponse } from "next";
 import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { withSessionRoute } from "@lib/iron";
@@ -10,6 +10,10 @@ import fetch from "node-fetch";
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
   const { code, error } = req.query;
+	if(!process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED || process.env[`GOOGLE_CLIENT_SECRET`] == null) {
+		res.status(HttpStatusCode.NOT_FOUND).end();
+		return;
+	}
 
   if (error) {
     return res.redirect(`/?error=${error}`);
@@ -63,7 +67,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
       email,
       username: (name as string)?.toLowerCase().replace(" ", ""),
       auth_type: "google",
-      flags: DiscouseUserFlags.None,
+      flags: DiscouseUserFlags.None.valueOf(),
       settings: {
         displayName: given_name ?? name,
         theme: "dark",

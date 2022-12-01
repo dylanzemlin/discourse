@@ -27,6 +27,10 @@ type TabProps = {
   isLoading: (value: boolean) => void;
 }
 
+const githubOAuthEnabled = (process.env.NEXT_PUBLIC_AUTH_GITHUB_ENABLED == "true" && process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID != null && process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI != null);
+const googleOAuthEnabled = (process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED == "true" && process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID != null && process.env.NEXT_PUBLIC_GOOGLE_REDIRECT_URI != null);
+const showAlternativeLogins = githubOAuthEnabled || googleOAuthEnabled;
+
 function LoginTab(props: TabProps) {
   // Router Usage
   const router = useRouter();
@@ -34,7 +38,6 @@ function LoginTab(props: TabProps) {
   // Login States
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [remember, setRemember] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -99,19 +102,20 @@ function LoginTab(props: TabProps) {
         Login
       </Button>
 
-      <Divider mt="xl" mb="md" />
+      <Divider mt="xl" mb="md" hidden={!showAlternativeLogins} />
 
-      <Text w="100%" px="sm" align="center">or login with</Text>
+      <Text w="100%" px="sm" align="center" hidden={!showAlternativeLogins}>or login with</Text>
       <Flex
         justify="center"
         w="100%"
         gap="md"
         mt="sm"
+        hidden={!showAlternativeLogins}
       >
-        <Anchor href={google_uri}>
+        <Anchor href={google_uri} hidden={!googleOAuthEnabled}>
           <BrandGoogle />
         </Anchor>
-        <Anchor href={github_uri}>
+        <Anchor href={github_uri} hidden={!githubOAuthEnabled}>
           <BrandGithub />
         </Anchor>
       </Flex>
@@ -255,19 +259,20 @@ function RegisterTab(props: TabProps) {
         Register
       </Button>
 
-      <Divider mt="xl" mb="md" />
+      <Divider mt="xl" mb="md" hidden={!showAlternativeLogins} />
 
-      <Text w="100%" px="sm" align="center">or create an account with</Text>
+      <Text w="100%" px="sm" align="center" hidden={!showAlternativeLogins}>or create an account with</Text>
       <Flex
         justify="center"
         w="100%"
         gap="md"
         mt="sm"
+        hidden={!showAlternativeLogins}
       >
-        <Anchor href={google_uri}>
+        <Anchor href={google_uri} hidden={!googleOAuthEnabled}>
           <BrandGoogle />
         </Anchor>
-        <Anchor href={github_uri}>
+        <Anchor href={github_uri} hidden={!githubOAuthEnabled}>
           <BrandGithub />
         </Anchor>
       </Flex>

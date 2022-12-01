@@ -18,8 +18,9 @@
       "@lib/*": ["./lib/*"],
       "@modals/*": ["./components/modals/*"],
       "@queries/*": ["./components/queries/*"],
-    }
+    },
+    "typeRoots": ["./node_modules/@types", "./global.d.ts"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "../global/enums.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]
 }
