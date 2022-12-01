@@ -21,11 +21,11 @@ namespace NodeJS {
     /**
      * The github oauth application secret used in production
      */
-    GITHUB_CLIENT_SECRET_PRODUCTION: string;
+    GITHUB_CLIENT_SECRET_PRODUCTION: string | null;
     /**
      * The github oauth application secret used in production
      */
-    GITHUB_CLIENT_SECRET_DEVELOPMENT: string;
+    GITHUB_CLIENT_SECRET_DEVELOPMENT: string | null;
 
     /**
      * The google oauth application secret
@@ -42,20 +42,20 @@ namespace NodeJS {
     /**
      * The github oauth application redirect url
      */
-    NEXT_PUBLIC_GITHUB_REDIRECT_URI: string;
+    NEXT_PUBLIC_GITHUB_REDIRECT_URI: string | null;
     /**
      * The github oauth application client id
      */
-    NEXT_PUBLIC_GITHUB_CLIENT_ID: string;
+    NEXT_PUBLIC_GITHUB_CLIENT_ID: string | null;
 
     /**
      * The google oauth application redirect url
      */
-    NEXT_PUBLIC_GOOGLE_REDIRECT_URI: string;
+    NEXT_PUBLIC_GOOGLE_REDIRECT_URI: string | null;
     /**
      * The google oauth application client id
      */
-    NEXT_PUBLIC_GOOGLE_CLIENT_ID: string;
+    NEXT_PUBLIC_GOOGLE_CLIENT_ID: string | null;
 
     /**
      * The URL to the websocket server

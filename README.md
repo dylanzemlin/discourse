@@ -8,7 +8,7 @@
  - [Jacob Pierce](https://github.com/pier116) (<jacob.pierce@ou.edu>) | Full Stack Developer
  - [Aayush Dalal](https://github.com/) (<aayush.dalal@ou.edu>) | Project Manager
 
-# Contributions
+## Contributions
 
 All members contributed to their respective fields regardless of what is shown in the commit history. For the majority of the project the team worked together on Dylan's computer, hence the commits being under his name.
 
@@ -46,7 +46,7 @@ The actual client and website to visit will be hosted at http://localhost:3000.
 
 ## 3rd Party Libraries
 
-Below is a list of third party packages/libraries used throughout the project
+Below is a list of third party packages/libraries used throughout the project. There are more, but these are big ones, the rest can be found in both `package.json` files.
 
   - [Next.js](https://nextjs.org/) - React framework
   - [React](https://reactjs.org/) - Frontend library
