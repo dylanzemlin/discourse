@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { withSessionRoute } from "@lib/iron";
 import pocket from "@lib/pocket";
+import { destroyCookie } from "nookies";
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
 	if (req.method !== "GET") {
@@ -9,6 +10,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 	}
 
 	if (!req.session.user) {
+		destroyCookie({ res }, "discourse-session");
 		return res.status(HttpStatusCode.UNAUTHORIZED).end();
 	}
 
@@ -24,6 +26,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 			}, 500);
 		}
 		
+		destroyCookie({ res }, "discourse-session");
 		return res.status(HttpStatusCode.UNAUTHORIZED).end();
 	}
 

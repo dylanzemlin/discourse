@@ -54,7 +54,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 	}
 
 	const emails: any[] = await emailResponse.json() as any;
-	const email = emails.find(e => e.visibility === "public")?.email ?? emails[0]?.email;
+	const email = emails.find(e => e.primary)?.email ?? emails[0]?.email;
 	if (email == null) {
 		return res.redirect(`/?error=no_email_found&error_source=Github OAuth`);
 	}

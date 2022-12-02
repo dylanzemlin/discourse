@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import HttpStatusCode from "../api/HttpStatusCode";
-import { destroyCookie } from "nookies";
+import { parseCookies } from "nookies";
 
 export type AuthState = {
 	user: AuthenticatedUser | null;
@@ -43,7 +43,6 @@ export function AuthenticationProvider({ children }: any) {
 				await revalidate();
 				setLoading(false);
 			} catch (_) {
-				destroyCookie(null, "discourse-session");
 				setLoading(false);
 			}
 		})()
@@ -60,8 +59,8 @@ export function AuthenticationProvider({ children }: any) {
 		}
 	}
 
-	const logout = () => {
-		destroyCookie(null, "discourse-session");
+	const logout = async () => {
+		await fetch("/api/logout");
 		setUser(null);
 	}
 
