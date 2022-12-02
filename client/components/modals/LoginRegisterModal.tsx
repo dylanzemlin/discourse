@@ -200,10 +200,10 @@ function RegisterTab(props: TabProps) {
 
     const result = await v1.REGISTER_USER(displayname, username, email, password);
 
-    setLoading(false);
-    props.isLoading(false);
-
     if (result.status !== HttpStatusCode.OK || result.error) {
+      setLoading(false);
+      props.isLoading(false);
+
       showNotification({
         title: `[${result.status}] Registration Failed`,
         message: result.error,
@@ -213,7 +213,12 @@ function RegisterTab(props: TabProps) {
       return;
     }
 
-    router.push("/chaos");
+    setTimeout(() => {
+      setLoading(false);
+      props.isLoading(false);
+
+      router.push("/chaos");
+    }, 1000);
   }
 
   return (

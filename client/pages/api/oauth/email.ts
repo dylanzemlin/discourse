@@ -83,8 +83,5 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		return register(req, res);
 	}
 
-	return res.status(HttpStatusCode.METHOD_NOT_ALLOWED).json({
-		error_code: HttpStatusCode.METHOD_NOT_ALLOWED,
-		error_text: "METHOD_NOT_ALLOWED"
-	});
+	return res.status(HttpStatusCode.METHOD_NOT_ALLOWED).end();
 })
