@@ -203,7 +203,7 @@ function RegisterTab(props: TabProps) {
     setLoading(false);
     props.isLoading(false);
 
-    if (result.status !== HttpStatusCode.CREATED || result.error) {
+    if (result.status !== HttpStatusCode.OK || result.error) {
       showNotification({
         title: `[${result.status}] Registration Failed`,
         message: result.error,
