@@ -68,7 +68,14 @@ export default function Home() {
 							<Button w={`${isMobile ? 125 : 200}px`} h="50px" style={{
 								fontSize: "1.5rem",
 								backgroundColor: "#B33A3A",
-							}} onClick={auth.logout}>Logout</Button>
+							}} onClick={() => {
+								auth.logout();
+								showNotification({
+									title: "Logged Out",
+									message: "You have been logged out.",
+									color: "green"
+								});
+							}}>Logout</Button>
 						</>
 					)}
 				</Flex>
