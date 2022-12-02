@@ -70,9 +70,7 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 
 		await req.session.save();
-		return res.status(HttpStatusCode.CREATED).json({
-			success: true
-		})
+		return res.status(HttpStatusCode.OK).end();
 	}
 }
 
