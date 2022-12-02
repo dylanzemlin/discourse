@@ -38,11 +38,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		return res.redirect(`/?error=github_oauth_failed&error_source=Github OAuth`);
 	}
 
-	const { access_token, scope } = await authResponse.json() as any;
-	if (!(scope as string).includes("user:email")) {
-		return res.redirect(`/?error=no_email_scope&error_source=Github OAuth`);
-	}
-
+	const { access_token } = await authResponse.json() as any;
 	const userResponse = await fetch("https://api.github.com/user", {
 		headers: { "Authorization": `Bearer ${access_token}` }
 	});
