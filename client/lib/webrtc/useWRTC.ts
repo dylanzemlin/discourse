@@ -345,8 +345,8 @@ export default function useWRTC() {
   }, [localState, send]);
 
   useEffect(() => {
-    setLocalState({ muted, video: videoEnabled, deafened, name: auth.user?.username ?? "John Doe" });
-  }, [muted, videoEnabled, deafened, auth.user?.username]);
+    setLocalState({ muted, video: videoEnabled, deafened, name: auth.user?.settings?.displayName ?? "John Doe" });
+  }, [muted, videoEnabled, deafened, auth.user?.settings?.displayName]);
 
   const toggleMuted = () => {
     if (localStream == null) {
