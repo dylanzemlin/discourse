@@ -10,7 +10,7 @@ import v1 from "@lib/api/v1";
 const github_params = new URLSearchParams({
   client_id: process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID as string,
   redirect_uri: process.env.NEXT_PUBLIC_GITHUB_REDIRECT_URI as string,
-  scope: "user:email"
+  scope: "user:email read:user"
 });
 const github_uri = `https://github.com/login/oauth/authorize?${github_params.toString()}`;
 

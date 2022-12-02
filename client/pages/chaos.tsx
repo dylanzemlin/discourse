@@ -8,9 +8,9 @@ import { useAuthentication } from "@lib/context/auth";
 import { useEffect, useRef, useState } from "react";
 import useWRTC from "@lib/webrtc/useWRTC";
 import ChatModal from "@modals/ChatModal";
+import { useRouter } from "next/router";
 import Image from "next/image";
 import Head from "next/head";
-import { useRouter } from "next/router";
 
 type VideoProps = {
 	stream: MediaStream | null;

@@ -1,8 +1,6 @@
-import { DiscourseErrorCode } from "@lib/api/DiscourseErrorCode";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import { existsSync, mkdirSync, appendFileSync } from "fs";
 import { NextApiRequest, NextApiResponse } from "next";
-import HttpStatusCode from "@lib/api/HttpStatusCode";
 import { withSessionRoute } from "@lib/iron";
 import formurlencoded from "form-urlencoded";
 import pocket from "@lib/pocket";
@@ -11,16 +9,15 @@ import fetch from "node-fetch";
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
   const { code, error } = req.query;
 	if(!process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED || process.env[`GOOGLE_CLIENT_SECRET`] == null) {
-		res.status(HttpStatusCode.NOT_FOUND).end();
-		return;
+		return res.redirect(`/?error=oauth_google_not_enabled&error_source=Google OAuth`);
 	}
 
   if (error) {
-    return res.redirect(`/?error=${error}`);
+    return res.redirect(`/?error=${error}&error_source=Google OAuth`);
   }
 
   if (!code) {
-    return res.redirect(`/?error=internal_server_error:0`);
+    return res.redirect(`/?error=internal_server_error&error_source=Google OAuth`);
   }
 
   const form = {
@@ -32,23 +29,19 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
   }
   const result = await fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: formurlencoded(form)
   });
   if (!result.ok) {
-    return res.redirect(`/?error=internal_server_error:1`);
+    return res.redirect(`/?error=authorization_failed&error_source=Google OAuth`);
   }
 
   const { access_token } = await result.json() as any;
   const profileInfo = await fetch("https://www.googleapis.com/oauth2/v1/userinfo", {
-    headers: {
-      "Authorization": `Bearer ${access_token}`
-    }
+    headers: { "Authorization": `Bearer ${access_token}` }
   });
   if (!profileInfo.ok) {
-    return res.redirect(`/?error=internal_server_error:2`);
+    return res.redirect(`/?error=api_profile_failed&error_source=Google OAuth`);
   }
 
   const { email, name, picture, given_name } = await profileInfo.json() as any;
@@ -57,10 +50,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
   try {
     user = await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);
     if (user.auth_type !== "google") {
-      return res.status(HttpStatusCode.BAD_REQUEST).json({
-        error_code: DiscourseErrorCode.OAUTH_EMAIL_ALREADY_USED,
-        error_text: "OAUTH_EMAIL_ALREADY_USED"
-      });
+      return res.redirect(`/?error=email_already_used&error_source=Google OAuth`);
     }
   } catch (e) {
     user = await pb.collection("users").create({

@@ -1,4 +1,3 @@
-import { DiscourseErrorCode } from "@lib/api/DiscourseErrorCode";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import { existsSync, mkdirSync, appendFileSync } from "fs";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -8,9 +7,8 @@ import pocket from "@lib/pocket";
 import fetch from "node-fetch";
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {
-	if(!process.env.NEXT_PUBLIC_AUTH_GITHUB_ENABLED || process.env[`GITHUB_CLIENT_SECRET_${process.env.NODE_ENV.toUpperCase()}`] == null) {
-		res.status(HttpStatusCode.NOT_FOUND).end();
-		return;
+	if (!process.env.NEXT_PUBLIC_AUTH_GITHUB_ENABLED || process.env[`GITHUB_CLIENT_SECRET_${process.env.NODE_ENV.toUpperCase()}`] == null) {
+		return res.redirect(`/?error=oauth_github_not_enabled&error_source=Github OAuth`);
 	}
 
 	const pb = await pocket();
@@ -18,10 +16,7 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 
 	if (process.env.NODE_ENV !== "development" && process.env.NODE_ENV !== "production") {
 		console.error(`[/api/oauth/github] Bad Node ENV: ${process.env.NODE_ENV}`);
-		return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-			error_code: DiscourseErrorCode.SERVER_BAD_ENVIRONMENT,
-			error_text: "SERVER_BAD_ENVIRONMENT"
-		});
+		return res.redirect(`/?error=internal_server_error&error_source=Github OAuth`);
 	}
 
 	const params = new URLSearchParams({
@@ -40,50 +35,41 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 	});
 
 	if (authResponse.status !== HttpStatusCode.OK) {
-		return res.status(HttpStatusCode.BAD_REQUEST).json({
-			error_code: DiscourseErrorCode.OAUTH_FAILED,
-			error_text: "OAUTH_FAILED",
-
-			response_code: authResponse.status,
-			response_text: authResponse.statusText,
-			response_body: await authResponse.text()
-		});
+		return res.redirect(`/?error=github_oauth_failed&error_source=Github OAuth`);
 	}
 
 	const { access_token, scope } = await authResponse.json() as any;
 	if (!(scope as string).includes("user:email")) {
-		return res.status(HttpStatusCode.BAD_REQUEST).json({
-			error_code: DiscourseErrorCode.OAUTH_BAD_SCOPES,
-			error_text: "OAUTH_BAD_SCOPES"
-		});
+		return res.redirect(`/?error=no_email_scope&error_source=Github OAuth`);
 	}
 
 	const userResponse = await fetch("https://api.github.com/user", {
-		headers: {
-			"Authorization": `Bearer ${access_token}`
-		}
+		headers: { "Authorization": `Bearer ${access_token}` }
 	});
-
 	if (userResponse.status !== HttpStatusCode.OK) {
-		return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
-			error_code: DiscourseErrorCode.OAUTH_API_ERROR,
-			error_text: "OAUTH_API_ERROR",
-
-			response_code: userResponse.status,
-			response_text: userResponse.statusText,
-			response_body: await userResponse.text()
-		});
+		return res.redirect(`/?error=api_user_failed&error_source=Github OAuth`);
 	}
 
-	const { login, email, name, avatar_url } = await userResponse.json() as any;
+	const emailResponse = await fetch("https://api.github.com/user/emails", {
+		headers: { "Authorization": `Bearer ${access_token}` }
+	});
+	if (emailResponse.status !== HttpStatusCode.OK) {
+		return res.redirect(`/?error=api_email_failed&error_source=Github OAuth`);
+	}
+
+	const emails: any[] = await emailResponse.json() as any;
+	const email = emails.find(e => e.visibility === "public")?.email ?? emails[0]?.email;
+	if (email == null) {
+		return res.redirect(`/?error=no_email_found&error_source=Github OAuth`);
+	}
+
+	const { login, name, avatar_url } = await userResponse.json() as any;
+
 	let user;
 	try {
 		user = await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);
 		if (user.auth_type !== "github") {
-			return res.status(HttpStatusCode.BAD_REQUEST).json({
-				error_code: DiscourseErrorCode.OAUTH_EMAIL_ALREADY_USED,
-				error_text: "OAUTH_EMAIL_ALREADY_USED"
-			});
+			return res.redirect(`/?error=email_already_used&error_source=Github OAuth`);
 		}
 	} catch (e) {
 		user = await pb.collection("users").create({
@@ -99,13 +85,13 @@ export default withSessionRoute(async function Route(req: NextApiRequest, res: N
 		});
 
 		const avatar_result = await fetch(avatar_url);
-    if (avatar_result.ok) {
-      if (!existsSync("./public/avatars")) {
-        mkdirSync("./public/avatars");
-      }
+		if (avatar_result.ok) {
+			if (!existsSync("./public/avatars")) {
+				mkdirSync("./public/avatars");
+			}
 
-      appendFileSync(`./public/avatars/${user.id}.png`, Buffer.from(await avatar_result.arrayBuffer()));
-    }
+			appendFileSync(`./public/avatars/${user.id}.png`, Buffer.from(await avatar_result.arrayBuffer()));
+		}
 	}
 
 	req.session.user = {

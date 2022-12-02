@@ -3,11 +3,28 @@ import { useAuthentication } from "../lib/context/auth";
 import { Button, Flex, Title } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { useRouter } from "next/router";
+import { useEffect } from "react";
+import { showNotification } from "@mantine/notifications";
 
 export default function Home() {
 	const isMobile = useMediaQuery("(max-width: 768px)");
 	const auth = useAuthentication();
 	const router = useRouter();
+
+	useEffect(() => {
+		const { error, error_source } = router.query;
+		if(!error || !error_source) {
+			return;
+		}
+
+		showNotification({
+			title: `${error_source} Error`,
+			message: error,
+			color: "red"
+		});
+
+		router.replace("/", "/", { shallow: true });
+	}, [router.query, router]);
 
 	return (
 		<>

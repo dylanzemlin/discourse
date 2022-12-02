@@ -10,7 +10,7 @@ const deleteUser = async (req: NextApiRequest, res: NextApiResponse) => {
     const user = await ps.collection("users").getFirstListItem(`id = "${req.session.user?.id}"`);
     await ps.collection("users").delete(user.id);
   } catch {
-    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({ message: "Internal Server Error" });
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).end();
   }
 
   try {
@@ -19,7 +19,7 @@ const deleteUser = async (req: NextApiRequest, res: NextApiResponse) => {
   } catch { /* ignore */ }
 
   req.session.destroy();
-  return res.status(HttpStatusCode.OK).json({ message: "OK" });
+  return res.status(HttpStatusCode.OK).end();
 }
 
 export default withSessionRoute(async function Route(req: NextApiRequest, res: NextApiResponse) {

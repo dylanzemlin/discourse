@@ -1,4 +1,3 @@
-import { DiscourseErrorCode } from "@lib/api/DiscourseErrorCode";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import { generateSalt, hashPassword } from "@lib/crypto";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -13,19 +12,12 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
 		const user = await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);
 		if (user.auth_type !== "password") {
-			return res.status(HttpStatusCode.BAD_REQUEST).json({
-				error_code: DiscourseErrorCode.AUTH_USE_SERVICE,
-				error_text: "AUTH_USE_SERVICE",
-				service: user.auth_type
-			});
+			return res.redirect(`/?error=email_already_used&error_source=Registration`);
 		}
 
 		const hashedPassword = await hashPassword(password as string, user.auth_email_salt);
 		if (hashedPassword !== user.auth_email_hash) {
-			return res.status(HttpStatusCode.BAD_REQUEST).json({
-				error_code: DiscourseErrorCode.AUTH_BAD_CREDENTIALS,
-				error_text: "AUTH_BAD_CREDENTIALS"
-			});
+			return res.redirect(`/?error=wrong_credentials&error_source=Registration`);
 		}
 
 		req.session.user = {
@@ -37,14 +29,9 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 			color: user.settings.color
 		}
 		await req.session.save();
-		return res.status(HttpStatusCode.OK).json({
-			success: true
-		});
+		return res.status(HttpStatusCode.OK).end();
 	} catch (_) {
-		return res.status(HttpStatusCode.BAD_REQUEST).json({
-			error_code: DiscourseErrorCode.AUTH_BAD_CREDENTIALS,
-			error_text: "AUTH_BAD_CREDENTIALS"
-		});
+		return res.redirect(`/?error=wrong_credentials&error_source=Registration`);
 	}
 }
 
@@ -53,19 +40,8 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 	const pb = await pocket();
 
 	try {
-		const user = await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);
-		if (user.auth_type !== "password") {
-			return res.status(HttpStatusCode.BAD_REQUEST).json({
-				error_code: DiscourseErrorCode.AUTH_USE_SERVICE,
-				error_text: "AUTH_USE_SERVICE",
-				service: user.auth_type
-			});
-		}
-
-		return res.status(HttpStatusCode.BAD_REQUEST).json({
-			error_code: DiscourseErrorCode.AUTH_EMAIL_EXISTS,
-			error_text: "AUTH_EMAIL_EXISTS"
-		});
+		await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);
+		return res.redirect(`/?error=email_already_used&error_source=Registration`);
 	} catch {
 		// No user exists, we create it
 		const salt = await generateSalt();
@@ -94,7 +70,6 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 
 		await req.session.save();
-
 		return res.status(HttpStatusCode.CREATED).json({
 			success: true
 		})

@@ -9,10 +9,7 @@ async function getUserSettings(req: NextApiRequest, res: NextApiResponse) {
   try {
     user = await pb.collection("users").getFirstListItem<any>(`id = "${req.session.user?.id}"`);
   } catch (e) {
-    return res.status(HttpStatusCode.UNAUTHORIZED).json({
-      error_code: HttpStatusCode.UNAUTHORIZED,
-      error_text: "UNAUTHORIZED"
-    });
+    return res.status(HttpStatusCode.UNAUTHORIZED).end();
   }
 
   // Remove the following keys from user
@@ -30,17 +27,11 @@ async function updateUserSettings(req: NextApiRequest, res: NextApiResponse) {
   try {
     user = await pb.collection("users").getFirstListItem<any>(`id = "${req.session.user?.id}"`);
   } catch (e) {
-    return res.status(HttpStatusCode.UNAUTHORIZED).json({
-      error_code: HttpStatusCode.UNAUTHORIZED,
-      error_text: "UNAUTHORIZED"
-    });
+    return res.status(HttpStatusCode.UNAUTHORIZED).end();
   }
 
   const settings = req.body;
-  // TODO: Verify settings does not contain weird stuff
-  await pb.collection("users").update(user.id, {
-    settings: settings
-  });
+  await pb.collection("users").update(user.id, { settings: settings });
 
   return res.status(HttpStatusCode.OK).json({
     ...(settings)
@@ -51,11 +42,7 @@ export default withSessionRoute(function UserSettingsRoute(req: NextApiRequest, 
   const { method } = req;
 
   if (req.session?.user == null) {
-    res.status(HttpStatusCode.UNAUTHORIZED).json({
-      error_code: HttpStatusCode.UNAUTHORIZED,
-      error_text: "UNAUTHORIZED"
-    });
-    return;
+    return res.status(HttpStatusCode.UNAUTHORIZED).end();
   }
 
   switch (method) {
@@ -64,9 +51,6 @@ export default withSessionRoute(function UserSettingsRoute(req: NextApiRequest, 
     case 'PATCH':
       return updateUserSettings(req, res);
     default:
-      return res.status(HttpStatusCode.METHOD_NOT_ALLOWED).json({
-        error_code: HttpStatusCode.METHOD_NOT_ALLOWED,
-        error_text: "METHOD_NOT_ALLOWED",
-      });
+      return res.status(HttpStatusCode.METHOD_NOT_ALLOWED).end();
   }
 })
