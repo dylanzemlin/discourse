@@ -98,6 +98,7 @@ function LoginTab(props: TabProps) {
         loading={loading}
         fullWidth
         mt="xl"
+        disabled={email.length === 0 || password.length === 0}
       >
         Login
       </Button>
@@ -137,6 +138,18 @@ function RegisterTab(props: TabProps) {
   // Router Usage
   const router = useRouter();
 
+  const validateNames = () => {
+    if (username.length === 0) {
+      return undefined;
+    }
+
+    if (displayname.length === 0) {
+      return undefined;
+    }
+
+    return false;
+  }
+  
   const validatePassword = () => {
     if (password.length === 0) {
       return undefined;
@@ -181,6 +194,7 @@ function RegisterTab(props: TabProps) {
 
   const handleRegister = async (e: any) => {
     e.preventDefault();
+
     setLoading(true);
     props.isLoading(true);
 
@@ -255,6 +269,7 @@ function RegisterTab(props: TabProps) {
         loading={loading}
         fullWidth
         mt="xl"
+        disabled={typeof validatePassword() !== "boolean" || typeof validateEmail() !== "boolean" || typeof validateNames() !== "boolean"}
       >
         Register
       </Button>
