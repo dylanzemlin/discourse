@@ -1,4 +1,4 @@
-import { Anchor, Button, Checkbox, Divider, Flex, Modal, PasswordInput, Tabs, TextInput, Title, Text } from "@mantine/core";
+import { Anchor, Button, Divider, Flex, Modal, PasswordInput, Tabs, TextInput, Title, Text } from "@mantine/core";
 import { BrandGithub, BrandGoogle } from "tabler-icons-react";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
@@ -135,9 +135,6 @@ function RegisterTab(props: TabProps) {
   const [blurred, setBlurred] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Router Usage
-  const router = useRouter();
-
   const validateNames = () => {
     if (username.length === 0) {
       return undefined;
@@ -199,25 +196,23 @@ function RegisterTab(props: TabProps) {
     props.isLoading(true);
 
     const result = await v1.REGISTER_USER(displayname, username, email, password);
-
-    if (result.status !== HttpStatusCode.OK || result.error) {
+    if (result.status !== HttpStatusCode.OK) {
       setLoading(false);
       props.isLoading(false);
 
       showNotification({
-        title: `[${result.status}] Registration Failed`,
-        message: result.error,
+        title: `[${result.data?.auth_source}] Registration Failed`,
+        message: result.data?.error,
         color: "red"
       });
-      console.error(result.error);
+      console.error(result.data);
       return;
     }
 
     setTimeout(() => {
       setLoading(false);
       props.isLoading(false);
-
-      router.push("/chaos");
+      location.href = "/chaos";
     }, 1000);
   }
 

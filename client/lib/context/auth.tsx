@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import HttpStatusCode from "../api/HttpStatusCode";
-import { parseCookies } from "nookies";
 
 export type AuthState = {
 	user: AuthenticatedUser | null;
@@ -49,7 +48,9 @@ export function AuthenticationProvider({ children }: any) {
 	}, []);
 
 	const revalidate = async () => {
-		const response = await fetch("/api/auth");
+		const response = await fetch("/api/auth", {
+			credentials: "include"
+		});
 		if (response.status === HttpStatusCode.OK) {
 			const user = await response.json();
 			setUser(user);

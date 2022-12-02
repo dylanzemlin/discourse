@@ -12,12 +12,18 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
 		const user = await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);
 		if (user.auth_type !== "password") {
-			return res.redirect(`/?error=email_already_used&error_source=Registration`);
+			return res.json({
+				error: "account_uses_" + user.auth_type,
+				error_source: "Login"
+			});
 		}
 
 		const hashedPassword = await hashPassword(password as string, user.auth_email_salt);
 		if (hashedPassword !== user.auth_email_hash) {
-			return res.redirect(`/?error=wrong_credentials&error_source=Registration`);
+			return res.json({
+				error: "invalid_credentials",
+				error_source: "Login"
+			});
 		}
 
 		req.session.user = {
@@ -31,7 +37,10 @@ const login = async (req: NextApiRequest, res: NextApiResponse) => {
 		await req.session.save();
 		return res.status(HttpStatusCode.OK).end();
 	} catch (_) {
-		return res.redirect(`/?error=wrong_credentials&error_source=Registration`);
+		return res.json({
+			error: "invalid_credentials",
+			error_source: "Login"
+		});
 	}
 }
 
@@ -41,7 +50,10 @@ const register = async (req: NextApiRequest, res: NextApiResponse) => {
 
 	try {
 		await pb.collection("users").getFirstListItem<any>(`email = "${email}"`);
-		return res.redirect(`/?error=email_already_used&error_source=Registration`);
+		return res.json({
+			error: "email_already_used",
+			error_source: "Registration"
+		});
 	} catch {
 		// No user exists, we create it
 		const salt = await generateSalt();

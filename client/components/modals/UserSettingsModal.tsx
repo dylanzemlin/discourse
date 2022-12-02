@@ -1,10 +1,10 @@
 import { Button, ColorInput, FileInput, Flex, LoadingOverlay, Modal, TextInput, Title } from "@mantine/core";
 import { showNotification } from "@mantine/notifications";
+import { useAuthentication } from "@lib/context/auth";
 import { FileUpload } from "tabler-icons-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import useApi from "@lib/useApi";
-import { useAuthentication } from "@lib/context/auth";
 
 type UserSettingsModalProps = {
   opened: boolean;

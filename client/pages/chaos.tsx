@@ -118,15 +118,9 @@ export default function Chaos() {
 	const isMobile = useMediaQuery("(max-width: 768px)");
 	const [avatar, setAvatar] = useState("/api/avatar");
 	const auth = useAuthentication();
-	const router = useRouter();
 	const wrtc = useWRTC();
 
-	if (auth.user == null && !auth.loading) {
-		router.push("/");
-		return;
-	}
-
-	if (!wrtc.isConnected || auth.user == null) {
+	if (!wrtc.isConnected || auth.user == null || auth.loading) {
 		return (
 			<LoadingOverlay visible={true} />
 		)

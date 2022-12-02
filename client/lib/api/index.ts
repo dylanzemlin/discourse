@@ -29,7 +29,8 @@ export class GenericAPI {
 	async request<T>(url: string, method: string, data?: any): Promise<APIResponse<T>> {
 		const result = await fetch(url, {
 			method,
-			body: data
+			body: data,
+			credentials: "include"
 		});
 
 		if (result.status === 404) {
