@@ -3,7 +3,6 @@ import { BrandGithub, BrandGoogle } from "tabler-icons-react";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
 import { showNotification } from "@mantine/notifications";
 import HttpStatusCode from "@lib/api/HttpStatusCode";
-import { useRouter } from "next/router";
 import { useState } from "react";
 import v1 from "@lib/api/v1";
 
@@ -32,9 +31,6 @@ const googleOAuthEnabled = (process.env.NEXT_PUBLIC_AUTH_GOOGLE_ENABLED == "true
 const showAlternativeLogins = githubOAuthEnabled || googleOAuthEnabled;
 
 function LoginTab(props: TabProps) {
-  // Router Usage
-  const router = useRouter();
-
   // Login States
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -47,17 +43,20 @@ function LoginTab(props: TabProps) {
 
     setLoading(false);
 
-    if (result.status != HttpStatusCode.OK || result.error) {
+    if (result.status !== HttpStatusCode.OK) {
+      setLoading(false);
+      props.isLoading(false);
+
       showNotification({
-        title: `[${result.status}] Login Failed`,
-        message: result.data?.error_text || "Unknown Error",
+        title: `[${result.data?.auth_source}] Login Failed`,
+        message: result.data?.error,
         color: "red"
       });
-      console.error(result.error);
+      console.error(result.data);
       return;
     }
 
-    router.push("/chaos");
+    location.href = "/chaos";
   }
 
   return (
