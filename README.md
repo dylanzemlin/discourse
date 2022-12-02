@@ -8,9 +8,9 @@
  - [Jacob Pierce](https://github.com/pier116) (<jacob.pierce@ou.edu>) | Full Stack Developer
  - [Aayush Dalal](https://github.com/) (<aayush.dalal@ou.edu>) | Project Manager
 
-## Contributions
+<!-- ## Contributions -->
 
-All members contributed to their respective fields regardless of what is shown in the commit history. For the majority of the project the team worked together on Dylan's computer, hence the commits being under his name.
+<!-- All members contributed to their respective fields regardless of what is shown in the commit history. For the majority of the project the team worked together on Dylan's computer, hence the commits being under his name. -->
 
 ## Requirements
 

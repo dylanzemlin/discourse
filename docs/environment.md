@@ -14,7 +14,8 @@ POCKETBASE_PASSWORD = super_secure_password # required
 IRON_PASSWORD = 32_character_long_password # required
 ```
 
-To get your pocketbase credentials and urls, see [pocketbase.md](./pocketbase.md). The `IRON_PASSWORD` variable can be set to anything as long as it is at minimum 32 characters long.
+To get your pocketbase credentials and urls, see [pocketbase.md](./pocketbase.md). Or, if you email dylan.zemlin@ou.edu he can give you credentials to the pre-existing database.  
+The `IRON_PASSWORD` variable can be set to anything as long as it is at minimum 32 characters long.
 
 ## Server Environment
 
