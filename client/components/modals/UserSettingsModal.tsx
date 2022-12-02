@@ -201,7 +201,7 @@ export default function UserSettingsModal(props: UserSettingsModalProps) {
         /> */}
 
         <Flex gap="lg" w="100%" justify="center">
-          <Button w="25%" mt="lg" disabled={!(email != data?.email || displayname != data?.settings?.name || color != data?.settings?.color)} onClick={save}>
+          <Button w="25%" mt="lg" disabled={!(email != data?.email || displayname != data?.settings?.displayName || color != data?.settings?.color)} onClick={save}>
             Save
           </Button>
           <Button w="25%" mt="lg" onClick={props.onClose} color="gray">
