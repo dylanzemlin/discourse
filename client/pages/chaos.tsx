@@ -22,12 +22,21 @@ type VideoProps = {
 
 function Video(props: VideoProps) {
 	const ref = useRef<HTMLVideoElement>(null);
+	const [name, setName] = useState<string>("John Doe");
 
 	useEffect(() => {
 		if (ref.current && props.stream) {
 			ref.current.srcObject = props.stream;
 		}
 	}, [props.stream, ref]);
+
+	useEffect(() => {
+		fetch(`/api/v1/user/name?uid=${props.uid}`).then(async res => {
+			setName(await res.text());
+		}).catch(err => {
+			console.error(err);
+		})
+	}, [props.uid]);
 
 	return (
 		<div style={{
@@ -53,7 +62,7 @@ function Video(props: VideoProps) {
 						<Image unoptimized src={`/api/avatar?uid=${props.uid}`} alt={`${props.uid}'s Avatar`} width={128} height={128} style={{
 							borderRadius: "50%",
 						}} />
-						<Title order={2}>John Doe</Title>
+						<Title order={2}>{name}</Title>
 					</Flex>
 				)}
 			</div>
