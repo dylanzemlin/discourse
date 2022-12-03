@@ -61,6 +61,15 @@ export default async function pocket() {
       });
     }
   }
+  
+  if (!pb.authStore.isValid) {
+    try {
+      await pb.admins.authWithPassword(process.env.POCKETBASE_EMAIL as string, process.env.POCKETBASE_PASSWORD as string);
+      pb.autoCancellation(false);
+    } catch {
+      return pb;
+    }
+  }
 
   return pb;
 }

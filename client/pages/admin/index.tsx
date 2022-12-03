@@ -13,7 +13,7 @@ import Head from "next/head";
 export default dynamic(() => Promise.resolve(Users), { ssr: false });
 
 function Users() {
-  const usersResult = useApi<any[]>({ url: "/api/v1/admin/users", method: "GET", runImmediate: true });
+  const usersResult = useApi<any[]>({ url: "/api/v1/admin/users", method: "GET" });
   const [globalState, setGlobalState] = useState<any>({ muted: false, chatDisabled: false });
   const [changingState, setChangingState] = useState(false);
   const { sendMessage, lastMessage, readyState } = useWebSocket(process.env.NEXT_PUBLIC_SOCKET_URI as string, {
@@ -36,6 +36,14 @@ function Users() {
     });
     sendMessage(str);
   }, [sendMessage]);
+
+  useEffect(() => {
+    if (readyState !== ReadyState.OPEN) {
+      return;
+    }
+
+    usersResult.refetch();
+  }, [readyState]);
 
   useEffect(() => {
     if (readyState !== ReadyState.OPEN || lastMessage == null) {
