@@ -4,6 +4,7 @@ import ws from "ws";
 
 import dotenv from "dotenv";
 import { v4 } from "uuid";
+import { DiscouseUserFlags, hasFlag } from "./DiscourseUserFlags";
 dotenv.config();
 
 const filter = new Filter();
@@ -19,57 +20,84 @@ let lastChat = Date.now();
 let lastChats: Record<string, number> = {};
 
 export enum PackageType {
-  // [Server -> Client] Used to request a ping from a client
-  // [Client -> Server] Used to respond to a ping from the server
-  PING,
+	// [Server -> Client] Used to request a ping from a client
+	// [Client -> Server] Used to respond to a ping from the server
+	PING,
 
-  // [Server -> Client] Used to broadcast a new chat message to all clients
-  // [Client -> Server] Used to send a new chat message to the server
-  SEND_CHAT,
+	// [Server -> Client] Used to broadcast a new chat message to all clients
+	// [Client -> Server] Used to send a new chat message to the server
+	SEND_CHAT,
 
-  // [Server -> Client] Used to broadcast that a message should be deleted
-  // [Client -> Server] Tells the server to delete a chat message
+	// [Server -> Client] Used to broadcast that a message should be deleted
+	// [Client -> Server] Tells the server to delete a chat message
 	DELETE_CHAT,
 
 	// [Server -> Client] Used to broadcast that the chat history should be cleared
-  // [Client -> Server] Tells the server to delete the chat history
+	// [Client -> Server] Tells the server to delete the chat history
 	CLEAR_CHAT,
-  
-  // [Client -> Server] Send to the server 
-  INIT,
 
-  // [Client -> Server] Send a signal to another peer
-  // [Server -> Client] Send a signal to a peer
-  SIGNAL,
+	// [Client -> Server] Send to the server 
+	INIT,
 
-  // [Server -> Client] Send to a client when a new client joins
-  CLIENT_JOINED,
+	// [Client -> Server] Send a signal to another peer
+	// [Server -> Client] Send a signal to a peer
+	SIGNAL,
 
-  // [Client -> Server] Send to the server when a client joins and is acknowledged by a peer
-  CLIENT_JOINED_ACK,
+	// [Server -> Client] Send to a client when a new client joins
+	CLIENT_JOINED,
 
-  // [Server -> Client] Send to a client when a client disconnects
-  CLIENT_DISCONNECTED,
+	// [Client -> Server] Send to the server when a client joins and is acknowledged by a peer
+	CLIENT_JOINED_ACK,
 
-  // [Server -> Client] Broadcast to all clients when a client changes their state (muted, video, etc)
-  // [Client -> Server] Send to the server when the state changes (muted, video, etc)
-  STATE_CHANGE,
+	// [Server -> Client] Send to a client when a client disconnects
+	CLIENT_DISCONNECTED,
+
+	// [Server -> Client] Broadcast to all clients when a client changes their state (muted, video, etc)
+	// [Client -> Server] Send to the server when the state changes (muted, video, etc)
+	STATE_CHANGE,
+
+	// [Client -> Server] Send to the server when initializing a admin connection
+	ADMIN_INIT,
+
+	REQUEST_USER_STATE,
+
+	GLOBAL_STATE_CHANGED,
+
+	CHANGE_GLOBAL_STATE,
+	CHANGE_GLOBAL_STATE_ACK
+}
+
+enum ConnectionType {
+	CHAT,
+	ADMIN,
 }
 
 declare module "ws" {
 	export interface WebSocket extends ws {
 		id: string;
 		missedPings: number;
+		type: ConnectionType;
+		isAdmin: boolean;
+		isMuted: boolean;
 	}
 }
 
 const clients: Record<string, ws.WebSocket> = {};
+const states: Record<string, any> = {};
 const wss = new ws.WebSocketServer({ port: 3001 });
+const globalState = {
+	muted: false,
+	chatDisabled: false
+}
 
 // Broadcast a message to every connected client
 const broadcast = (data: any, blacklist?: string[]) => {
 	wss.clients.forEach((client) => {
 		if (blacklist?.includes(client.id)) {
+			return;
+		}
+
+		if (client.type !== ConnectionType.CHAT) {
 			return;
 		}
 
@@ -96,7 +124,7 @@ wss.on("connection", async (localSocket, req) => {
 		password: process.env.IRON_PASSWORD as string
 	});
 
-	const { id, username } = sessionData.user as any;
+	const { id, username, flags } = sessionData.user as any;
 	if (id == null || username == null) {
 		localSocket.close();
 		return;
@@ -104,6 +132,8 @@ wss.on("connection", async (localSocket, req) => {
 
 	localSocket.id = id;
 	localSocket.missedPings = 0;
+	localSocket.isAdmin = hasFlag(flags as number, DiscouseUserFlags.Admin);
+	localSocket.isMuted = hasFlag(flags as number, DiscouseUserFlags.GlobalMuted);
 	localSocket.send(JSON.stringify({
 		type: PackageType.INIT,
 		chatHistory
@@ -130,19 +160,84 @@ wss.on("connection", async (localSocket, req) => {
 				localSocket.missedPings = 0;
 			} break;
 
+			case PackageType.CHANGE_GLOBAL_STATE: {
+				if (!localSocket.isAdmin) return;
+
+				if (!(json.key in globalState)) {
+					localSocket.send(JSON.stringify({
+						type: PackageType.CHANGE_GLOBAL_STATE_ACK,
+						state: globalState,
+						success: false
+					}));
+					return;
+				}
+
+				(globalState as any)[json.key] = json.value;
+				broadcast({
+					type: PackageType.GLOBAL_STATE_CHANGED,
+					state: globalState
+				});
+				localSocket.send(JSON.stringify({
+					type: PackageType.CHANGE_GLOBAL_STATE_ACK,
+					state: globalState,
+					success: true
+				}));
+			} break;
+
 			case PackageType.STATE_CHANGE: {
+				if (localSocket.isMuted) {
+					json.state.muted = true;
+				}
+
+				if (globalState.muted) {
+					json.state.muted = localSocket.isAdmin ? json.state.muted : true;
+				}
+
+				states[localSocket.id] = json.state;
 				broadcast({
 					type: PackageType.STATE_CHANGE,
 					uid: localSocket.id,
 					state: json.state
 				}, [localSocket.id]);
 			} break;
-			
+
+			case PackageType.ADMIN_INIT: {
+				if (!localSocket.isAdmin) {
+					localSocket.close();
+					return;
+				}
+
+				// Send them the current global state
+				localSocket.type = ConnectionType.ADMIN;
+				localSocket.send(JSON.stringify({
+					type: PackageType.ADMIN_INIT,
+					state: globalState
+				}))
+			} break;
+
+			case PackageType.REQUEST_USER_STATE: {
+				const uid = json.uid;
+				if (uid == null || !(uid in clients)) {
+					return;
+				}
+
+				localSocket.send(JSON.stringify({
+					type: PackageType.STATE_CHANGE,
+					uid,
+					state: states[uid]
+				}));
+			} break;
+
 			case PackageType.INIT: {
+				localSocket.type = ConnectionType.CHAT;
 				broadcast({
 					type: PackageType.CLIENT_JOINED,
 					uid: localSocket.id
 				}, [localSocket.id]);
+				localSocket.send(JSON.stringify({
+					type: PackageType.GLOBAL_STATE_CHANGED,
+					state: globalState
+				}));
 			} break;
 
 			case PackageType.SIGNAL: {
@@ -171,7 +266,8 @@ wss.on("connection", async (localSocket, req) => {
 			} break;
 
 			case PackageType.DELETE_CHAT: {
-				// Technically we should do some server side authentication here, but it'll be okay
+				if (!localSocket.isAdmin) return;
+
 				chatHistory = chatHistory.filter((chat) => chat.id !== json.id);
 				broadcast({
 					type: PackageType.DELETE_CHAT,
@@ -180,7 +276,8 @@ wss.on("connection", async (localSocket, req) => {
 			} break;
 
 			case PackageType.CLEAR_CHAT: {
-				// Technically we should do some server side authentication here, but it'll be okay
+				if (!localSocket.isAdmin) return;
+
 				chatHistory = [];
 				broadcast({
 					type: PackageType.CLEAR_CHAT
@@ -188,12 +285,15 @@ wss.on("connection", async (localSocket, req) => {
 			} break;
 
 			case PackageType.SEND_CHAT: {
-				if (localSocket.id == null) {
+				console.log(localSocket.isAdmin);
+				if (localSocket.id == null || (globalState.chatDisabled && !localSocket.isAdmin)) {
+					console.log(0);
 					return;
 				}
 
 				// Ensure the message is not undefined and has at least 1 character
-				if (json.message == undefined || json.message == "" || typeof json.message != "string" || json.message.trim().length <= 0) {
+				if (json.message == undefined || json.message == "" || typeof json.message != "string" || json.message.trim().length <= 0 || json.message.length > 250) {
+					console.log(2);
 					return;
 				}
 
@@ -204,6 +304,7 @@ wss.on("connection", async (localSocket, req) => {
 
 				// If the user has sent a second message within the last 1.5 seconds, ignore it
 				if (Date.now() - lastChats[localSocket.id] < 1500) {
+					console.log(3);
 					return;
 				}
 				lastChats[localSocket.id] = Date.now();
@@ -245,6 +346,7 @@ wss.on("connection", async (localSocket, req) => {
 			uid: localSocket.id
 		});
 		delete clients[localSocket.id];
+		delete states[localSocket.id];
 		clearInterval(pingInterval);
 	});
 

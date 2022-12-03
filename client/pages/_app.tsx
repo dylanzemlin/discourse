@@ -1,6 +1,7 @@
 import { NotificationsProvider } from '@mantine/notifications';
 import { AuthenticationProvider } from '../lib/context/auth';
 import { useLocalStorage } from '@mantine/hooks';
+import { ModalsProvider } from '@mantine/modals';
 import { MantineProvider } from '@mantine/core';
 import { AppProps } from 'next/app';
 import "../styles/globals.css";
@@ -8,7 +9,7 @@ import Head from 'next/head';
 
 export default function App(props: AppProps) {
 	const { Component, pageProps } = props;
-	const [ theme ] = useLocalStorage<"light" | "dark">({ key: "discourse-theme", defaultValue: "dark" });
+	const [theme] = useLocalStorage<"light" | "dark">({ key: "discourse-theme", defaultValue: "dark" });
 
 	return (
 		<>
@@ -30,7 +31,9 @@ export default function App(props: AppProps) {
 					autoClose={5000}
 				>
 					<AuthenticationProvider>
-						<Component {...pageProps} />
+						<ModalsProvider>
+							<Component {...pageProps} />
+						</ModalsProvider>
 					</AuthenticationProvider>
 				</NotificationsProvider>
 			</MantineProvider>

@@ -60,12 +60,12 @@ export enum PackageType {
 
   // [Server -> Client] Used to broadcast that a message should be deleted
   // [Client -> Server] Tells the server to delete a chat message
-  DELETE_CHAT,
+	DELETE_CHAT,
 
-  // [Server -> Client] Used to broadcast that the chat history should be cleared
+	// [Server -> Client] Used to broadcast that the chat history should be cleared
   // [Client -> Server] Tells the server to delete the chat history
-  CLEAR_CHAT,
-
+	CLEAR_CHAT,
+  
   // [Client -> Server] Send to the server 
   INIT,
 
@@ -85,6 +85,16 @@ export enum PackageType {
   // [Server -> Client] Broadcast to all clients when a client changes their state (muted, video, etc)
   // [Client -> Server] Send to the server when the state changes (muted, video, etc)
   STATE_CHANGE,
+
+	// [Client -> Server] Send to the server when initializing a admin connection
+	ADMIN_INIT,
+
+	REQUEST_USER_STATE,
+	
+	GLOBAL_STATE_CHANGED,
+
+	CHANGE_GLOBAL_STATE,
+	CHANGE_GLOBAL_STATE_ACK
 }
 
 type PeerState = {
@@ -113,6 +123,12 @@ export default function useWRTC() {
   });
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [isConnected, setIsConnected] = useState(false);
+
+  // Global State
+  const [globalState, setGlobalState] = useState<any>({
+    muted: false,
+    chatDisabled: false
+  });
 
   // Local States
   const [videoEnabled, setVideoEnabled] = useState(true);
@@ -144,6 +160,10 @@ export default function useWRTC() {
   }, [sendMessage]);
 
   const sendChat = (message: string) => {
+    if(globalState.chatDisabled && !auth.hasFlag(DiscouseUserFlags.Admin)) {
+      return;
+    }
+
     send(PackageType.SEND_CHAT, {
       message,
       name: localState.name,
@@ -223,8 +243,20 @@ export default function useWRTC() {
       if (deafened) {
         stream.getAudioTracks().forEach(track => track.enabled = false);
       }
+
+      send(PackageType.REQUEST_USER_STATE, {
+        uid
+      });
     });
   }
+
+  useEffect(() => {
+    if(!globalState.muted || muted) {
+      return;
+    }
+
+    toggleMuted();
+  }, [globalState.muted])
 
   // Triggered on every message received
   useEffect(() => {
@@ -238,6 +270,10 @@ export default function useWRTC() {
       switch (packet.type) {
         case PackageType.PING: {
           send(PackageType.PING, {});
+        } break;
+
+        case PackageType.GLOBAL_STATE_CHANGED: {
+          setGlobalState(packet.state);
         } break;
 
         case PackageType.STATE_CHANGE: {
@@ -349,7 +385,7 @@ export default function useWRTC() {
   }, [muted, videoEnabled, deafened, auth.user?.settings?.displayName]);
 
   const toggleMuted = () => {
-    if (localStream == null) {
+    if (localStream == null || (globalState.muted && !auth.hasFlag(DiscouseUserFlags.Admin))) {
       return;
     }
 
@@ -396,6 +432,7 @@ export default function useWRTC() {
     sendChat,
     deleteChat,
     clearChat,
-    messages
+    messages,
+    globalState
   }
 }

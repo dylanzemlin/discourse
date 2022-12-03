@@ -8,6 +8,7 @@ import { v4 } from "uuid";
 
 type ChatModalProps = {
   messages: any[],
+  globalState: any,
   sendChat: (message: string) => void,
   clearChat: () => void,
   deleteChat: (id: string) => void
@@ -90,7 +91,7 @@ export default function ChatModal(props: ChatModalProps) {
             props.sendChat(message);
             setMessage("");
           }} />
-          <Button onClick={() => {
+          <Button disabled={(props.globalState?.chatDisabled && !auth.hasFlag(DiscouseUserFlags.Admin)) || message.length == 0 || !message} onClick={() => {
             if (!message || message.length == 0) {
               return;
             }

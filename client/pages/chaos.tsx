@@ -68,6 +68,8 @@ type ActionMenuProps = {
 	toggleVideo: () => void;
 	localState: any;
 	isMobile: boolean;
+	globalState: any;
+	auth: any;
 }
 
 function ActionMenu(props: ActionMenuProps) {
@@ -82,7 +84,7 @@ function ActionMenu(props: ActionMenuProps) {
 
 				<Menu.Dropdown>
 					<Group ml="lg">
-						<Menu.Item onClick={props.toggleMuted} icon={<Microphone color={props.localState?.muted ? "red" : undefined} />}>
+						<Menu.Item disabled={(props.globalState?.muted && !props.auth.hasFlag(DiscouseUserFlags.Admin))} onClick={props.toggleMuted} icon={<Microphone color={(props.localState?.muted || props.globalState?.muted) ? "red" : undefined} />}>
 							{props.localState?.muted ? "Unmute" : "Mute"}
 						</Menu.Item>
 						<Menu.Item onClick={props.toggleDeafened} icon={<Headphones color={props.localState?.deafened ? "red" : undefined} />}>
@@ -179,14 +181,14 @@ export default function Chaos() {
 						backgroundImage: "linear-gradient(to right, var(--discourse-primary), var(--discourse-secondary))",
 						marginRight: "1rem",
 					}} />
-					<ChatModal messages={wrtc.messages.array} sendChat={wrtc.sendChat} deleteChat={wrtc.deleteChat} clearChat={wrtc.clearChat} />
+					<ChatModal messages={wrtc.messages.array} sendChat={wrtc.sendChat} deleteChat={wrtc.deleteChat} clearChat={wrtc.clearChat} globalState={wrtc.globalState} />
 					<div style={{
 						height: "3px",
 						width: "50px",
 						backgroundColor: "var(--discourse-secondary)",
 						marginRight: "1rem"
 					}} />
-					<ActionMenu isMobile={isMobile} toggleDeafened={wrtc.toggleDeafened} toggleMuted={wrtc.toggleMuted} toggleVideo={wrtc.toggleVideo} localState={wrtc.localState} />
+					<ActionMenu auth={auth} isMobile={isMobile} toggleDeafened={wrtc.toggleDeafened} toggleMuted={wrtc.toggleMuted} toggleVideo={wrtc.toggleVideo} localState={wrtc.localState} globalState={wrtc.globalState} />
 				</Flex>
 			</Flex>
 			<UserSettingsModal onAvatarChanged={() => {
