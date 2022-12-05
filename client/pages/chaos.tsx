@@ -159,7 +159,7 @@ export default function Chaos() {
 				<title>Discourse - Chaos</title>
 			</Head>
 			<Flex w="100%" h="100vh" direction="column">
-				<ScrollArea style={{
+				<Box component={ScrollArea} style={{
 					flexGrow: 1,
 					padding: "1em",
 					display: "flex",
@@ -169,7 +169,7 @@ export default function Chaos() {
 					height: "100%",
 					justifyContent: "center",
 					flexWrap: "wrap",
-					maxWidth: "100%"
+					maxWidth: "100%",
 				}}>
 					<Video globalState={wrtc.globalState} isMobile={isMobile} isLocal uid={auth.user.id} state={wrtc.localState} stream={wrtc.localStream} />
 
@@ -178,7 +178,7 @@ export default function Chaos() {
 							<Video globalState={wrtc.globalState} isMobile={isMobile} isLocal={false} uid={uid} stream={wrtc.streams.get(uid)} state={wrtc.peerStates.get(uid)} key={uid} />
 						)
 					})}
-				</ScrollArea>
+				</Box>
 				<Flex p="0rem 0.3rem" pr="1.5rem" style={{
 					marginTop: "auto",
 					width: "100%",
