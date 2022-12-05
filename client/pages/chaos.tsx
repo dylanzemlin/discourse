@@ -1,4 +1,4 @@
-import { ActionIcon, Button, Flex, Group, LoadingOverlay, Menu, Title } from "@mantine/core";
+import { ActionIcon, Box, Button, Flex, Group, LoadingOverlay, Menu, Title } from "@mantine/core";
 import { Headphones, Microphone, Camera, Menu2 as MenuIcon } from "tabler-icons-react";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
 import { useDisclosure, useMediaQuery } from "@mantine/hooks";
@@ -8,13 +8,13 @@ import { useAuthentication } from "@lib/context/auth";
 import { useEffect, useRef, useState } from "react";
 import useWRTC from "@lib/webrtc/useWRTC";
 import ChatModal from "@modals/ChatModal";
-import { useRouter } from "next/router";
 import Image from "next/image";
 import Head from "next/head";
 
 type VideoProps = {
 	stream: MediaStream | null;
 	state: any;
+	globalState: any;
 	uid: string;
 	isLocal: boolean;
 	isMobile: boolean;
@@ -53,10 +53,17 @@ function Video(props: VideoProps) {
 				width: "100%",
 			}}>
 				{props.state?.video ? (
-					<>
-						{props.state?.muted && <Microphone color={"red"} />}
-						{props.state?.deafened && <Headphones color={"red"} />}
-					</>
+					<Box sx={{
+						display: "flex",
+						background: "rgba(0, 0, 0, 0.8)",
+						height: "fit-content",
+						padding: "0.25rem",
+						borderRadius: "0.25rem",
+					}}>
+						{<Title order={5} mr="xs">{name}</Title>}
+						{(props.state?.muted || props.globalState?.muted) && <Microphone color={"#E33A3A"} />}
+						{props.state?.deafened && <Headphones color={"#E33A3A"} />}
+					</Box>
 				) : (
 					<Flex w="100%" h="100%" align="center" justify="center" gap="2rem">
 						<Image unoptimized src={`/api/avatar?uid=${props.uid}`} alt={`${props.uid}'s Avatar`} width={128} height={128} style={{
@@ -154,12 +161,15 @@ export default function Chaos() {
 					gap: "1rem",
 					width: "100%",
 					height: "100%",
-					justifyContent: isMobile ? "center" : undefined
+					justifyContent: isMobile ? "center" : undefined,
+					flexWrap: "wrap",
+					maxWidth: "100%"
 				}}>
-					<Video isMobile={isMobile} isLocal uid={auth.user.id} state={wrtc.localState} stream={wrtc.localStream} />
+					<Video globalState={wrtc.globalState} isMobile={isMobile} isLocal uid={auth.user.id} state={wrtc.localState} stream={wrtc.localStream} />
+
 					{wrtc.streams.keys().map((uid) => {
 						return (
-							<Video isMobile={isMobile} isLocal={false} uid={uid} stream={wrtc.streams.get(uid)} state={wrtc.peerStates.get(uid)} key={uid} />
+							<Video globalState={wrtc.globalState} isMobile={isMobile} isLocal={false} uid={uid} stream={wrtc.streams.get(uid)} state={wrtc.peerStates.get(uid)} key={uid} />
 						)
 					})}
 				</div>

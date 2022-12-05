@@ -42,6 +42,10 @@ export default function ChatModal(props: ChatModalProps) {
           <ScrollArea>
             <Flex mah="70vh" direction="column" gap="xs">
               {props.messages?.map((message) => {
+                if(message.content?.length == 0 || message.author == null) {
+                  return null;
+                }
+
                 return (
                   <Box sx={{
                     transition: "all 0.2s ease",

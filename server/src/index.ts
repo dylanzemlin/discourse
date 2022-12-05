@@ -310,7 +310,12 @@ wss.on("connection", async (localSocket, req) => {
 				lastChats[localSocket.id] = Date.now();
 
 				// Clean the message and push it to the history
-				const message = filter.clean(json.message);
+				let message;
+				try {
+					message = filter.clean(json.message);
+				} catch (_) {
+					message = json.message;
+				}
 				const id = v4();
 				chatHistory.push({
 					uid: localSocket.id,

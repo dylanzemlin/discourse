@@ -1,5 +1,5 @@
-import { ActionIcon, Badge, Button, Card, ColorSwatch, Divider, Flex, LoadingOverlay, Table, Title, Tooltip, Text } from "@mantine/core";
-import { AlertTriangle, File, Hammer, MicrophoneOff, Shield } from "tabler-icons-react";
+import { ActionIcon, Badge, Button, Card, ColorSwatch, Divider, Flex, LoadingOverlay, Table, Title, Tooltip, Text, ScrollArea } from "@mantine/core";
+import { AlertTriangle, File, MicrophoneOff, Shield, Trash } from "tabler-icons-react";
 import { DiscouseUserFlags, hasFlag } from "@lib/api/DiscourseUserFlags";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import { showNotification } from "@mantine/notifications";
@@ -112,12 +112,40 @@ function Users() {
     });
   }
 
-  const setAccountMuted = (id: string, muted: boolean) => {
-    fetch(`/api/v1/admin/users/${id}/mute`, { method: "POST", body: JSON.stringify({ muted }) });
+  const setAccountMuted = async (id: string, muted: boolean) => {
+    const res = await fetch(`/api/v1/admin/users?id=${id}&action=${muted ? "mute" : "unmute"}`, { method: "PATCH" });
+    if(res.status === 200) {
+      showNotification({
+        title: "Success",
+        message: `The account has been ${muted ? "muted" : "unmuted"}.`,
+        color: "green"
+      });
+      return await usersResult.refetch();
+    }
+
+    showNotification({  
+      title: "Error",
+      message: `There was an error ${muted ? "muting" : "unmuting"} the account.`,
+      color: "red"
+    });
   }
 
-  const setAdminStatus = (id: string, isAdmin: boolean) => {
-    fetch(`/api/v1/admin/users/${id}/admin`, { method: "POST", body: JSON.stringify({ isAdmin }) });
+  const setAdminStatus = async (id: string, isAdmin: boolean) => {
+    const res = await fetch(`/api/v1/admin/users?id=${id}&action=${!isAdmin ? "demote" : "promote"}`, { method: "PATCH" });
+    if(res.status === 200) {
+      showNotification({
+        title: "Success",
+        message: `The account has been ${isAdmin ? "promoted" : "demoted"}.`,
+        color: "green"
+      });
+      return await usersResult.refetch();
+    }
+
+    showNotification({  
+      title: "Error",
+      message: `There was an error ${isAdmin ? "promoting" : "demoting"} the account.`,
+      color: "red"
+    });
   }
 
   const toggleMuteAll = () => {
@@ -136,13 +164,13 @@ function Users() {
 
   const cleanSlate = () => {
     openConfirmModal({
-      title: "Trigger Operation Clean Slate",
-      children: "Are you sure you want to trigger Operation Clean Slate? This action cannot be undone, and will delete ALL user accounts and data.",
+      title: "Delete All Accounts",
+      children: "Are you sure you want to do this? This action cannot be undone, and will delete ALL user accounts and data.",
       labels: { confirm: "Confirm", cancel: "Cancel" },
       centered: true,
       confirmProps: { color: "red" },
       onConfirm: async () => {
-        await fetch(`/api/v1/admin/cleanslate`, { method: "DELETE" });
+        await fetch(`/api/v1/admin/clean`, { method: "POST" });
       }
     });
   }
@@ -153,7 +181,7 @@ function Users() {
         <title>Discourse - Chaos</title>
       </Head>
       <Flex p="lg" gap="md">
-        <Card shadow="lg">
+        <Card shadow="lg" p="sm">
           <Flex direction="column" gap="sm" w="fit-content">
             <LoadingOverlay visible={readyState !== ReadyState.OPEN} />
             <Title order={2}>Global State</Title>
@@ -169,15 +197,19 @@ function Users() {
               Clear Chat
             </Button>
 
-            <Divider size="lg" label="Danger Zone" labelPosition="center" labelProps={{ color: "#e03131", size: "md" }} />
+            <Divider  size="lg" label="Danger Zone" labelPosition="center" labelProps={{ color: "#e03131", size: "md" }} />
 
             <Button color="red" leftIcon={<AlertTriangle />} onClick={cleanSlate}>
-              Operation Clean Slate
+              Delete All Accounts
             </Button>
           </Flex>
         </Card>
 
-        <Card shadow="lg">
+        <Card shadow="lg" component={ScrollArea} sx={{
+          maxHeight: "calc(100vh - 3rem)",
+          overflowY: "auto",
+          overflowX: "auto"
+        }}>
           <LoadingOverlay visible={usersResult.loading} />
           <Title order={2}>User Management</Title>
           <Table
@@ -192,7 +224,8 @@ function Users() {
               },
               "tbody > tr": {
                 borderBottom: "1px solid #373A40"
-              }
+              },
+              fontSize: "0.8rem"
             }}
           >
             <thead>
@@ -237,17 +270,17 @@ function Users() {
                       <Flex>
                         <Tooltip label="Delete Account">
                           <ActionIcon onClick={() => deleteAccount(user.id)}>
-                            <Hammer />
+                            <Trash />
                           </ActionIcon>
                         </Tooltip>
 
-                        <Tooltip label={isMuted ? "Global Unmute" : "Global Mute"} onClick={() => setAccountMuted(user.id, !setAccountMuted)}>
+                        <Tooltip label={isMuted ? "Global Unmute" : "Global Mute"} onClick={() => setAccountMuted(user.id, !isMuted)}>
                           <ActionIcon>
                             <MicrophoneOff color={isMuted ? "red" : undefined} />
                           </ActionIcon>
                         </Tooltip>
 
-                        <Tooltip label={isAdmin ? "Promote to Admin" : "Demote from Admin"} onClick={() => setAdminStatus(user.id, !isAdmin)}>
+                        <Tooltip label={!isAdmin ? "Promote to Admin" : "Demote from Admin"} onClick={() => setAdminStatus(user.id, !isAdmin)}>
                           <ActionIcon>
                             <Shield color={isAdmin ? "var(--discourse-primary)" : undefined} />
                           </ActionIcon>
