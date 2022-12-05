@@ -1,11 +1,12 @@
 import { ActionIcon, Box, Button, Flex, Group, LoadingOverlay, Menu, Title } from "@mantine/core";
 import { Headphones, Microphone, Camera, Menu2 as MenuIcon } from "tabler-icons-react";
 import { DiscouseUserFlags } from "@lib/api/DiscourseUserFlags";
-import { useDisclosure, useMediaQuery } from "@mantine/hooks";
+import { useDisclosure, useHover, useMediaQuery } from "@mantine/hooks";
 import UserSettingsModal from "@modals/UserSettingsModal";
 import MediaDeviceQuery from "@queries/MediaDeviceQuery";
 import { useAuthentication } from "@lib/context/auth";
 import { useEffect, useRef, useState } from "react";
+import Styles from "../styles/chaos.module.css";
 import useWRTC from "@lib/webrtc/useWRTC";
 import ChatModal from "@modals/ChatModal";
 import Image from "next/image";
@@ -23,6 +24,7 @@ type VideoProps = {
 function Video(props: VideoProps) {
 	const ref = useRef<HTMLVideoElement>(null);
 	const [name, setName] = useState<string>("John Doe");
+	const { hovered, ref: outerDivRef } = useHover();
 
 	useEffect(() => {
 		if (ref.current && props.stream) {
@@ -39,7 +41,7 @@ function Video(props: VideoProps) {
 	}, [props.uid]);
 
 	return (
-		<div style={{
+		<div ref={outerDivRef} style={{
 			position: "relative",
 			height: "min-content",
 			width: "min-content",
@@ -50,17 +52,19 @@ function Video(props: VideoProps) {
 				padding: "1rem",
 				display: "flex",
 				height: "100%",
-				width: "100%",
+				width: "100%"
 			}}>
 				{props.state?.video ? (
-					<Box sx={{
+					<Box className={Styles.peerInfo} sx={{
 						display: "flex",
-						background: "rgba(0, 0, 0, 0.8)",
+						background: "rgba(0, 0, 0, 0.95)",
 						height: "fit-content",
 						padding: "0.25rem",
 						borderRadius: "0.25rem",
+						zIndex: 50,
+						transform: hovered ? "scale(1.1)" : "scale(1)",
 					}}>
-						{<Title order={5} mr="xs">{name}</Title>}
+						{<Title order={5} mr={props.state?.muted || props.state?.deafened || props.globalState?.muted ? "xs" : undefined}>{name}</Title>}
 						{(props.state?.muted || props.globalState?.muted) && <Microphone color={"#E33A3A"} />}
 						{props.state?.deafened && <Headphones color={"#E33A3A"} />}
 					</Box>
@@ -73,7 +77,9 @@ function Video(props: VideoProps) {
 					</Flex>
 				)}
 			</div>
-			<video ref={ref} muted={props.isLocal || props.state?.muted} autoPlay />
+			<video style={{
+				borderRadius: "0.25rem"
+			}} ref={ref} muted={props.isLocal || props.state?.muted} autoPlay />
 		</div>
 	)
 }

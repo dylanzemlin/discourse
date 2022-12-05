@@ -1,10 +1,11 @@
 import LoginRegisterModal from "@modals/LoginRegisterModal";
+import { showNotification } from "@mantine/notifications";
 import { useAuthentication } from "../lib/context/auth";
 import { Button, Flex, Title } from "@mantine/core";
+import Styles from "../styles/index.module.css";
 import { useMediaQuery } from "@mantine/hooks";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { showNotification } from "@mantine/notifications";
 
 export default function Home() {
 	const isMobile = useMediaQuery("(max-width: 768px)");
@@ -61,11 +62,11 @@ export default function Home() {
 						<LoginRegisterModal />
 					) : (
 						<>
-							<Button w={`${isMobile ? 125 : 200}px`} h="50px" style={{
+							<Button className={Styles.button} w={`${isMobile ? 125 : 200}px`} h="50px" style={{
 								fontSize: "1.5rem",
 								backgroundColor: "var(--discourse-primary)",
 							}} onClick={() => router.push("/chaos")}>Enter Chaos</Button>
-							<Button w={`${isMobile ? 125 : 200}px`} h="50px" style={{
+							<Button className={Styles.button} w={`${isMobile ? 125 : 200}px`} h="50px" style={{
 								fontSize: "1.5rem",
 								backgroundColor: "#B33A3A",
 							}} onClick={() => {
