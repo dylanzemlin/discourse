@@ -294,7 +294,9 @@ function RegisterTab(props: TabProps) {
   )
 }
 
-export default function LoginRegisterModal() {
+export default function LoginRegisterModal(props: {
+  loading: boolean
+}) {
   // UI State
   const [tab, setTab] = useState<"login" | "register">("login");
   const [opened, handler] = useDisclosure(false);
@@ -330,7 +332,7 @@ export default function LoginRegisterModal() {
           </Tabs.Panel>
         </Tabs>
       </Modal>
-      <Button onClick={handler.open} w={`${isMobile ? 125 : 200}px`} h="50px" color="violet" style={{
+      <Button loading={loading} onClick={handler.open} w={`${isMobile ? 125 : 200}px`} h="50px" color="violet" style={{
         fontSize: "1.5rem"
       }}>Login</Button>
     </>

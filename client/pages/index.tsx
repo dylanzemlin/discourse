@@ -59,7 +59,7 @@ export default function Home() {
 
 				<Flex mt="xl" gap="xl">
 					{(!auth.user || auth.loading) ? (
-						<LoginRegisterModal />
+						<LoginRegisterModal loading={auth.loading} />
 					) : (
 						<>
 							<Button className={Styles.button} w={`${isMobile ? 125 : 200}px`} h="50px" style={{
