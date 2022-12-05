@@ -57,7 +57,7 @@ function Video(props: VideoProps) {
 				{props.state?.video ? (
 					<Box className={Styles.peerInfo} sx={{
 						display: "flex",
-						background: "rgba(0, 0, 0, 0.95)",
+						background: "rgba(0, 0, 0, 0.80)",
 						height: "fit-content",
 						padding: "0.25rem",
 						borderRadius: "0.25rem",
@@ -167,7 +167,7 @@ export default function Chaos() {
 					gap: "1rem",
 					width: "100%",
 					height: "100%",
-					justifyContent: isMobile ? "center" : undefined,
+					justifyContent: "center",
 					flexWrap: "wrap",
 					maxWidth: "100%"
 				}}>
