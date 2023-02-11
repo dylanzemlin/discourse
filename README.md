@@ -2,11 +2,6 @@
 
 Discourse is a single channel voice application made for CS 3202 (Software Engineering) at the University of Oklahoma. Its primary purpose is to allow users to talk to eachother and have fun while avoiding the need to create channels and servers.
 
-## Authors
-
- - [Dylan Zemlin](https://github.com/dylanzemlin/) (<dylan.zemlin@ou.edu>) | Full Stack Developer
- - [Jacob Pierce](https://github.com/pier116) (<jacob.pierce@ou.edu>) | Full Stack Developer
- - [Aayush Dalal](https://github.com/) (<aayush.dalal@ou.edu>) | Project Manager
 ## Requirements
 
 Below are the requirements and the versions we ran our tests on. We cannot guarantee that the application will work on other versions.
